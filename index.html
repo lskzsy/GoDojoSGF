@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> demo </title>
+</head>
+<body style="background: white;">
+
+    <div id="chessboard" style="margin: 0 auto;"></div>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="GoDojoSGF.js"></script>
+    <script type="text/javascript">
+        $.ajax({
+            url: 'test.sgf',
+            type: 'GET',
+            success: (data) => {
+                window.sgf = new SGF(data);
+                window.sgf.showOn('chessboard');
+            }
+        });
+    </script>
+</body>
+</html>
