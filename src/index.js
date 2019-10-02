@@ -1,4 +1,4 @@
-var SGF = function (sgfData) {
+window.SGF = function (sgfData) {
     this.encoding = 'utf-8';
     this.boardSize = '19';
     this.application = 'GoDojoSGF:1.0.0';
@@ -16,11 +16,11 @@ var SGF = function (sgfData) {
     const rawData = sgfData.replace(/\n/g, '');
     this.symbolMap = this._scan(rawData);
     this.data = [];
-    this.file = [];
+    this.unsave = {};
     if (this.symbolMap && rawData[0] == '(') {
         let raws = this._parse(rawData, 0, this.symbolMap[0]);
         this._parseRoot(raws[0]);
-        this.file = this.data = this._convert(raws.slice(1));
+        this.data = this._convert(raws.slice(1));
         this.runtime.history = [];
         this.runtime.step = -1;
         this.runtime.branch = this.data;
@@ -56,16 +56,29 @@ SGF.prototype.default = function () {
 SGF.prototype.putChess = function (chess) {
     if (this.runtime.board[chess.x][chess.y] === '' 
             && !this._isAsphyxiating(chess.x, chess.y, chess.color.toLowerCase())) {
-        if (chess.color == 'W') {
+        if (chess.color == 'w') {
             this.board.putWhite(chess.x, chess.y);
             this.runtime.board[chess.x][chess.y] = 'w';
             this.board.select('b');
         } else {
             this.board.putBlack(chess.x, chess.y);
             this.runtime.board[chess.x][chess.y] = 'b';
-            this.board.select('w');
+            this.board.select('b');
         }
         this.runtime.data.push(chess);
+    }
+}
+
+SGF.prototype._unsave = function (chess) {
+    this.unsave[`${chess.x}:${chess.y}:${chess.color}`] = chess;
+}
+
+SGF.prototype.save = function () {
+    if (Object.keys(this.unsave)) {
+        for (let key in this.unsave) {
+            this.unsave[key].status = 'saved';
+        }
+        this.unsave = {};
     }
 }
 
@@ -73,8 +86,10 @@ SGF.prototype.insert = function (x, y, c) {
     const chess = {
         color: c.toUpperCase(),
         x: x,
-        y: y
+        y: y,
+        status: 'new'
     };
+    this._unsave(chess);
     this.runtime.data.push(chess);
     const step = ++this.runtime.step;
     if (step < this.runtime.branch.length) {
@@ -82,7 +97,6 @@ SGF.prototype.insert = function (x, y, c) {
         if (!(cur instanceof Array)) {
             if (cur.x != chess.x || cur.y != chess.y || cur.color != chess.color) {
                 const old = this.runtime.branch.splice(step);
-                const newBranch = [];
                 this.runtime.branch.push(old);
                 this.runtime.branch.push([chess]);
                 this._nextBranch(step, this.runtime.branch.length - 1);
@@ -195,8 +209,17 @@ SGF.prototype.showOn = function (id) {
     this.board.setOnRClickListener(this._rclick.bind(this));
 }
 
-SGF.prototype._rclick = function (x, y) {
+SGF.prototype._rclick = function () {
+    if (step > -1) {
+        const stone = this.runtime.branch[this.runtime.step];
+        if (stone.status == 'new') {
+            this._delete(stone);
+        }
+    }  
+}
 
+SGF.prototype._delete = function (stone) {
+    
 }
 
 SGF.prototype._click = function (x, y, type) {
@@ -307,9 +330,10 @@ SGF.prototype._convert = function (raws) {
             const match = /(W|B)\[(\w)(\w)\]/.exec(raws[i]);
             if (match) {
                 answer.push({
-                    color: match[1],
+                    color: match[1].toLocaleLowerCase(),
                     x: match[2].charCodeAt() - a,
-                    y: match[3].charCodeAt() - a
+                    y: match[3].charCodeAt() - a,
+                    status: 'saved'
                 });
             }
         }
@@ -392,7 +416,7 @@ SGF.prototype._parseRoot = function (rootData) {
     }
 }
 
-var SGFBoard = function (hook, option = {}) {
+const SGFBoard = function (hook, option = {}) {
     this.width = option.width || 19;
     this.height = option.height || 19;
     this.lineColor = option.lineColor || 'black';
