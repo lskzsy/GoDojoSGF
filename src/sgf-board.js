@@ -265,24 +265,21 @@ SGFBoard.prototype._drawObject = function (x, y, type, prompt = false) {
         ctx.fillStyle = this.branchColor;
         ctx.fillText(type, loc.x, loc.y, this.padding - 2);
     } else {
-        const markCtx = this.markLayer.getContext('2d');
+        const markCtx = prompt ? ctx : this.markLayer.getContext('2d');
         let markSize = this.padding / 5;
-        markCtx.fillStyle = this.markColor;
+        markCtx.fillStyle = prompt ? '#00000055' : this.markColor;
         markCtx.strokeStyle = this.markColor;
         markCtx.lineWidth = 1;
+        markCtx.beginPath();
         if (type == 'CR') {
-            markCtx.beginPath();
             markCtx.arc(loc.x, loc.y, markSize, 0, 2 * Math.PI);
-            markCtx.closePath();
         } else if (type == 'TR') {
             markSize = this.padding / 4;
             const ySize = markSize / 2;
             const xSize = markSize * Math.sqrt(3) / 2 
-            markCtx.beginPath();
             markCtx.moveTo(loc.x - xSize, loc.y + ySize);
             markCtx.lineTo(loc.x, loc.y - markSize);
             markCtx.lineTo(loc.x + xSize, loc.y + ySize);
-            markCtx.closePath(); 
         } else if (type == 'SQ') {
             markCtx.rect(
                 loc.x - markSize, loc.y - markSize,
@@ -290,18 +287,17 @@ SGFBoard.prototype._drawObject = function (x, y, type, prompt = false) {
         } else if (type == 'MA') {
             const ySize = markSize;
             markCtx.lineWidth = 2;
-            markCtx.beginPath();
             markCtx.moveTo(loc.x - ySize, loc.y - ySize);
             markCtx.lineTo(loc.x + ySize, loc.y + ySize);
             markCtx.moveTo(loc.x + ySize, loc.y - ySize);
             markCtx.lineTo(loc.x - ySize, loc.y + ySize);
-            markCtx.closePath();
-        } else if (/^LB[A-Z]$/.test(type)) {
+        } else if (/^LB[A-Z]?$/.test(type)) {
             markCtx.font = `${parseInt(this.padding * 2 / 3) - 1}px bold Apercu`;
             markCtx.textAlign = 'center';
             markCtx.textBaseline = 'middle';
-            markCtx.fillText(type[2], loc.x, loc.y, this.padding - 2);
+            markCtx.fillText(type.length == 3 ? type[2] : 'A', loc.x, loc.y, this.padding - 2);
         }
+        markCtx.closePath(); 
         markCtx.fill();
         markCtx.stroke();
     }

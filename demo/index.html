@@ -87,9 +87,9 @@
             <a class="btn-floating waves-effect blue" onclick="sgf.left();">
                     <i class="material-icons">fast_rewind</i></a>
             <a class="btn-floating waves-effect blue" onclick="sgf.back();">
-                    <i class="material-icons">skip_previous</i></a>
+                    <i class="material-icons">arrow_left</i></a>
             <a class="btn-floating waves-effect green" onclick="sgf.continue();">
-                    <i class="material-icons">skip_next</i></a>
+                    <i class="material-icons">arrow_right</i></a>
             <a class="btn-floating waves-effect green" onclick="sgf.right();">
                     <i class="material-icons">fast_forward</i></a>
         </div>
@@ -141,16 +141,12 @@
             $('#modeView').html('');
             switch (mode) {
                 case 'w':
-                    $('#modeView').addClass('btn-floating white');
                     M.toast({html: '只落白子', displayLength: 1500});
                     break;
                 case 'b':
-                    $('#modeView').addClass('btn-floating black');
                     M.toast({html: '只落黑子', displayLength: 1500});
                     break;
                 case 'repeat':
-                    $('#modeView').addClass('btn-floating gray');
-                    $('#modeView').html('<i class="material-icons">repeat</i>');
                     M.toast({html: '交替落子', displayLength: 1500});
                     break;
             }

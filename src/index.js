@@ -109,9 +109,11 @@ SGF.prototype.setInputMode = function (mode) {
         this.runtime.select = mode;
         this.runtime.hasFront() &&
         this.runtime.front.select(mode);
-    } else if (/^mark(TR|CR|SQ|MA)$/.test(mode)) {
-        // this.runtime.hasFront() &&
-        // this.runtime.front.select(mode);
+    } else if (/^mark(TR|CR|SQ|MA|LB)$/.test(mode)) {
+        this.runtime.hasFront() &&
+        this.runtime.front.select(mode.substr(4));
+    } else if (mode == 'repeat') {
+        this.runtime.front.select(this.runtime.select);
     }
 }
 
