@@ -4,6 +4,7 @@ const SGFRuntime = function () {
     this.currentStep = 0;
     this.board = [];
     this.front = null;
+    this.select = 'b';
 
     this.data = [];
     this.killBy = {};
@@ -11,6 +12,8 @@ const SGFRuntime = function () {
 
     this.width = 0;
     this.height = 0;
+    
+    this.mode = 'repeat';
 }
 
 SGFRuntime.prototype.setFront = function (front) {
@@ -55,23 +58,29 @@ SGFRuntime.prototype.kill = function (chesses) {
 SGFRuntime.prototype.backLife = function () {
     const dead = this.killBy[this.currentStep];
     if (dead) {
-        dead.forEach(d => this.putChess(d));
+        dead.forEach(d => {  this.currentStep--; this.putChess(d); });
         this.killBy[this.currentStep] = false;
     }
 }
 
-SGFRuntime.prototype.putChess = function (chess) {
+SGFRuntime.prototype.putChess = function (chess, isNew=false) {
     if (this.board[chess.x][chess.y] === '' 
             && !GoRule.isAsphyxiating(this, chess.x, chess.y, chess.color)) {
         this.currentStep++;
+        if (isNew) {
+            this.branch.insert(chess.x, chess.y, chess.color);
+        }
+        this.branch.checkMark();
         if (chess.color == 'w') {
             this.front && this.front.putWhite(chess.x, chess.y);
             this.board[chess.x][chess.y] = 'w';
-            this.front && this.front.select('b');
+            this.select = 'b';
+            this.front && this.mode == 'repeat' && this.front.select('b');
         } else {
             this.front && this.front.putBlack(chess.x, chess.y);
             this.board[chess.x][chess.y] = 'b';
-            this.front && this.front.select('b');
+            this.select = 'w';
+            this.front && this.mode == 'repeat' && this.front.select('w');
         }
         this.data.push(chess);
     }

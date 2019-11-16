@@ -1,20 +1,174 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title> demo </title>
+    <title> 【GoDojo】在线SGF编辑器 | SGF Online </title>
+    <link href="css/google-icons.css" rel="stylesheet">
+    <link href="css/materialize.min.css" rel="stylesheet">
+    <link href="css/jstree.min.css" rel="stylesheet">
 </head>
-<body style="background: white;">
+<body>
+    <div class="container">
+        <div class="row">
+            <div id="chessboard" style="margin: 0 auto; width: 400px; height: 400px;">
+                <div style="position: absolute; margin-left: -150px; margin-top: 30px;">
+                    <label> <strong>落子模式</strong> </label>
+                    <div class="radio">
+                    <label>
+                        <input name="mode" type="radio" checked rel="repeat" />
+                        <span>交替落子</span>
+                    </label>
+                    </div>
+                    <div class="radio">
+                    <label>
+                        <input name="mode" type="radio" rel="b" />
+                        <span>只落黑子</span>
+                    </label>
+                    </div>
+                    <div class="radio">
+                    <label>
+                        <input name="mode" type="radio" rel="w" />
+                        <span>只落白子</span>
+                    </label>
+                    </div>
+                    <div class="radio">
+                    <label>
+                        <input name="mode" type="radio" rel="mark" />
+                        <span>添加标记</span>
+                    </label>
+                    </div>
+                    <div id="markTypeView" class="input-field col s8" style="margin-top: 25px; display: none;">
+                        <select id="markType">
+                            <option value="SQ">□</option>
+                            <option value="CR">○</option>
+                            <option value="TR">△</option>
+                            <option value="MA">×</option>
+                            <option value="LB">ABC</option>
+                        </select>
+                        <label>标记类型</label>
+                    </div>  
+                </div>
 
-    <div id="chessboard" style="margin: 0 auto;"></div>
-    <script type="text/javascript" src="jquery.min.js"></script>
-    <script type="text/javascript" src="GoDojoSGF.bundle.js"></script>
-    <script type="text/javascript">
+                <div style="position: absolute; margin-top: 300px; margin-left: -150px;"> 
+                    <div class="switch">
+                        <label>
+                            坐标显示
+                            <input id="coordinateShow" type="checkbox" checked>
+                            <span class="lever"></span>
+                        </label>
+                    </div>
+                    <div class="switch">
+                        <label>
+                            步数显示
+                            <input type="checkbox">
+                            <span class="lever"></span>
+                        </label>
+                    </div>
+                    <div class="switch">
+                        <label>
+                            落子辅助
+                            <input id="promptShow" type="checkbox" checked>
+                            <span class="lever"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="text-align: center;">
+            <!-- <div class="fixed-action-btn" style="position: relative; right: 0; left: 0; padding-top: 0; bottom: 0; display: inline;">
+                <a class="btn-floating gray" id="modeView">
+                    <i class="large material-icons">repeat</i>
+                </a>
+                <ul>
+                    <li><a class="btn-floating white" onclick="changeMode('w')"></a></li>
+                    <li><a class="btn-floating black" onclick="changeMode('b')"></a></li>
+                    <li><a class="btn-floating gray" onclick="changeMode('repeat')"><i class="material-icons">repeat</i></a></li>
+                </ul>
+            </div> -->
+            <a class="btn-floating waves-effect blue" onclick="sgf.left();">
+                    <i class="material-icons">fast_rewind</i></a>
+            <a class="btn-floating waves-effect blue" onclick="sgf.back();">
+                    <i class="material-icons">skip_previous</i></a>
+            <a class="btn-floating waves-effect green" onclick="sgf.continue();">
+                    <i class="material-icons">skip_next</i></a>
+            <a class="btn-floating waves-effect green" onclick="sgf.right();">
+                    <i class="material-icons">fast_forward</i></a>
+        </div>
+    </div>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jstree.min.js"></script>
+    <script src="js/materialize.min.js"></script>
+    <script src="GoDojoSGF.bundle.js"></script>
+    <script>
+        // $('.fixed-action-btn').floatingActionButton({ hoverEnabled: false });
+        $('select').formSelect();
+        $('#html1').jstree();
+
+        $('#coordinateShow').on('click', (e) => {
+            if (e.currentTarget.checked) {
+                sgf.showCoordinate();
+            } else {
+                sgf.hideCoordinate();
+            }
+        });
+
+        $('#promptShow').on('click', (e) => {
+            if (e.currentTarget.checked) {
+                sgf.showPrompt();
+            } else {
+                sgf.hidePrompt();
+            }
+        });
+
+        $(':radio[name="mode"]').on('click', (e) => {
+            let mode = e.currentTarget.attributes.rel.value;
+            if (mode == 'mark') {
+                $('#markTypeView').show();
+                mode += $('#markType').val();
+            } else {
+                $('#markTypeView').hide();
+            }
+
+            changeMode(mode);
+        });
+
+        $('#markType').on('change', (e) => {
+            changeMode(`mark${$('#markType').val()}`);
+        });
+
+        function changeMode(mode) {
+            $('#modeView').removeClass();
+            $('#modeView').html('');
+            switch (mode) {
+                case 'w':
+                    $('#modeView').addClass('btn-floating white');
+                    M.toast({html: '只落白子', displayLength: 1500});
+                    break;
+                case 'b':
+                    $('#modeView').addClass('btn-floating black');
+                    M.toast({html: '只落黑子', displayLength: 1500});
+                    break;
+                case 'repeat':
+                    $('#modeView').addClass('btn-floating gray');
+                    $('#modeView').html('<i class="material-icons">repeat</i>');
+                    M.toast({html: '交替落子', displayLength: 1500});
+                    break;
+            }
+            sgf.setInputMode(mode);
+        }
+
         $.ajax({
-            url: 'test.sgf',
+            url: 'sgf/test.sgf',
             type: 'GET',
             success: (data) => {
-                window.sgf = new SGF(data);
-                window.sgf.showOn('chessboard');
+                window.sgf = SGF.create({
+                    data: data
+                });
+                const boardDiv = $('#chessboard');
+                window.sgf.showOn('chessboard', {
+                    styleWidth: boardDiv.width(),
+                    styleHeight: boardDiv.height()
+                });
             }
         });
     </script>

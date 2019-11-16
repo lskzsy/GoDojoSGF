@@ -4,13 +4,40 @@ const SGFBranch = function (runtime) {
     this.branch = runtime.root;
     this.history = [];
     this.step = -1;
+    this.runtime.branch = this;
+}
+
+SGFBranch.prototype.insertMark = function (x, y, type) {
+    const mark = {
+        x: x,
+        y: y,
+        type: type
+    };
+    if (type == 'LB') {
+        let count = 0;
+        if (this.branch[this.step].marks != undefined
+            && this.branch[this.step].marks != null) {
+            this.branch[this.step].marks.forEach(mark => {
+                mark.type == 'LB' && count++;
+            });
+        }
+        mark.d = String.fromCharCode('A'.charCodeAt() + count);
+    }
+    this.runtime.hasFront() &&
+    this.runtime.front.putMark(mark);
+    
+    if (this.branch[this.step].marks == null) {
+        this.branch[this.step].marks = [];
+    }
+    this.branch[this.step].marks.push(mark);
 }
 
 SGFBranch.prototype.insert = function (x, y, c) {
     const chess = {
         color: c,
         x: x,
-        y: y
+        y: y,
+        marks: null
     };
     this.runtime.data.push(chess);
     const step = ++this.step;
@@ -54,44 +81,66 @@ SGFBranch.prototype.continue = function () {
         if (!(cur instanceof Array)) {
             this.runtime.putChess(cur);
 
-            this._checkBranch(step);
+            return this._checkBranch(step);
         } else {
             this.step--;
+            return true;
         }
     } else {
         this.step--;
+        return true;
     }
+}
+
+SGFBranch.prototype.delete = function (stone) {
+    
 }
 
 SGFBranch.prototype.back = function() {
     const step = this.step;
+    let flag = false;
     if (step > -1) {
         const chess = this.branch[step];
-        // console.log(this.branch, chess);
+        this.runtime.select = this.runtime.board[chess.x][chess.y];
         this.runtime.hasFront() && 
-            this.runtime.front.select(this.runtime.board[chess.x][chess.y]);
+        this.runtime.front.select(this.runtime.board[chess.x][chess.y]);
 
         this.runtime.board[chess.x][chess.y] = '';
         this.runtime.hasFront() && this.runtime.front.delete(chess.x, chess.y);
 
         this.runtime.backLife();
-        this.step--;
         this.runtime.currentStep--;
+        this.step--;
         this.runtime.data.pop();
 
         this._clearBranchMark();
     }
     if (this.step == -1) {
+        flag = true;
         const history = this.history.pop();
         if (history) {
             this.branch = history.branch;
             this.step = history.step;
-            this._checkBranch(this.step);   
+            flag = this._checkBranch(this.step);   
         }
+    }
+    this.checkMark();
+    return flag;
+}
+
+SGFBranch.prototype.checkMark = function () {
+    if (this.runtime.hasFront()) {
+        this.runtime.front.clearMark();
+        if (this.step >= 0 && this.branch[this.step]) {
+            const stone = this.branch[this.step];
+            if (stone.marks) {
+                stone.marks.forEach(mark => this.runtime.front.putMark(mark));
+            }
+        }   
     }
 }
 
-SGFBranch.prototype._nextBranch = function(step, i) {
+SGFBranch.prototype._nextBranch = function (step, i) {
     this.history.push({
         branch: this.branch,
         step: step - 1
@@ -113,8 +162,11 @@ SGFBranch.prototype._checkBranch = function (step) {
                     y: branch[i][0].y
                 });
             }
+            return true;
         }
     }
+
+    return false;
 }
 
 SGFBranch.prototype._clearBranchMark = function () {

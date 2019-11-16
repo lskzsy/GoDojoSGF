@@ -49,13 +49,40 @@ SGFConvertor.prototype._convert = function (raws) {
         if (typeof(raws[i]) == 'object') {
             answer.push(this._convert(raws[i]));
         } else {
-            const match = /(W|B)\[(\w)(\w)\]/.exec(raws[i]);
+            const match = /^(W|B)\[(\w)(\w)\](.*?)$/.exec($.trim(raws[i]));
             if (match) {
-                answer.push({
+                const stone = {
                     color: match[1].toLocaleLowerCase(),
                     x: match[2].charCodeAt() - a,
-                    y: match[3].charCodeAt() - a
-                });
+                    y: match[3].charCodeAt() - a,
+                    marks: null
+                };       
+                if (match[4].length > 0) {
+                    stone.marks = [];
+                    const ms = match[4].match(/(TR|SQ|MA|CR)(\[\w\w\])+/g);
+                    ms.forEach(mark => {
+                        const mM = /^(TR|SQ|MA|CR)(.*?)$/.exec(mark);
+                        if (mM) {
+                            const ms = mM[2].match(/\[\w\w\]/g);
+                            ms.forEach(m => stone.marks.push({
+                                type: mM[1],
+                                x: m[1].charCodeAt() - a,
+                                y: m[2].charCodeAt() - a,
+                            }));
+                        }
+                    });
+                    const lbM = /LB((\[\w\w:[A-Z]\])+)/.exec(match[4]);
+                    if (lbM) {
+                        const lbs = lbM[1].match(/\[\w\w:[A-Z]\]/g);
+                        lbs.forEach(lb => stone.marks.push({
+                            type: 'LB',
+                            x: lb[1].charCodeAt() - a,
+                            y: lb[2].charCodeAt() - a,
+                            d: lb[4]
+                        }));
+                    }
+                }
+                answer.push(stone);
             }
         }
     }
