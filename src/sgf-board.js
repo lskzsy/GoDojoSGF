@@ -214,7 +214,7 @@ SGFBoard.prototype._drawCoordinate = function () {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (let i = 0, c='A'; i < this.width; i++) {
-        if (c == 'H') {
+        if (c == 'I') {
             i--;
         } else {
             const loc = this.node.get(i, 0);

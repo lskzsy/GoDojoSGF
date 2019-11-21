@@ -7,91 +7,106 @@
     <link href="css/jstree.min.css" rel="stylesheet">
 </head>
 <body>
+    <ul class="sidenav sidenav-fixed" style="width: 150px">
+        <li style="text-align: center; height: 100px;">
+            <img src="img/logo.png" width="100" height="100"></li>
+        <li><div class="divider"></div></li>
+        <li><a class="subheader">落子模式</a></li>
+        <li class="mode-radio active"><a class="mode-btn" rel="repeat">交替落子</a></li>
+        <li class="mode-radio"><a class="mode-btn" rel="b">只落黑子</a></li>
+        <li class="mode-radio"><a class="mode-btn" rel="w">只落白子</a></li>
+        <li class="no-padding">
+            <li class="mode-radio"><a class="mode-btn dropdown-trigger" id="mark-selector" data-target="mark-type" rel="markSQ">添加标记</a></li>
+            <ul id='mark-type' class='dropdown-content'>
+                <li><a class="mark-type-btn" rel="SQ">方形</a></li>
+                <li><a class="mark-type-btn" rel="CR">圆形</a></li>
+                <li><a class="mark-type-btn" rel="TR">三角</a></li>
+                <li><a class="mark-type-btn" rel="MA">交叉</a></li>
+                <li><a class="mark-type-btn" rel="LB">字母</a></li>
+            </ul>
+        </li>
+        <li><div class="divider"></div></li>
+        <li><a class="subheader">棋盘设置</a></li>
+        <li class="no-padding">
+            <div style="text-align: center;"> 
+                <div class="switch" style="height: 40px;">
+                    <label>
+                        坐标显示
+                        <input id="coordinateShow" type="checkbox" checked>
+                        <span class="lever"></span>
+                    </label>
+                </div>
+                <div class="switch" style="height: 40px;">
+                    <label>
+                        步数显示
+                        <input type="checkbox">
+                        <span class="lever"></span>
+                    </label>
+                </div>
+                <div class="switch" style="height: 40px;">
+                    <label>
+                        落子辅助
+                        <input id="promptShow" type="checkbox" checked>
+                        <span class="lever"></span>
+                    </label>
+                </div>
+            </div>
+        </li>
+        <li><div class="divider"></div></li>
+        <li><a onclick="$('.tap-target').tapTarget('open');">帮助</a></li>
+        <li><a onclick="$('#about-modal').modal('open');">关于</a></li>
+    </ul>
+
+    <div id="tree" style="float: right; margin-top: 20px; margin-right: 120px;">
+    </div>
+
     <div class="container">
         <div class="row">
             <div id="chessboard" style="margin: 0 auto; width: 400px; height: 400px;">
-                <div style="position: absolute; margin-left: -150px; margin-top: 30px;">
-                    <label> <strong>落子模式</strong> </label>
-                    <div class="radio">
-                    <label>
-                        <input name="mode" type="radio" checked rel="repeat" />
-                        <span>交替落子</span>
-                    </label>
-                    </div>
-                    <div class="radio">
-                    <label>
-                        <input name="mode" type="radio" rel="b" />
-                        <span>只落黑子</span>
-                    </label>
-                    </div>
-                    <div class="radio">
-                    <label>
-                        <input name="mode" type="radio" rel="w" />
-                        <span>只落白子</span>
-                    </label>
-                    </div>
-                    <div class="radio">
-                    <label>
-                        <input name="mode" type="radio" rel="mark" />
-                        <span>添加标记</span>
-                    </label>
-                    </div>
-                    <div id="markTypeView" class="input-field col s8" style="margin-top: 25px; display: none;">
-                        <select id="markType">
-                            <option value="SQ">□</option>
-                            <option value="CR">○</option>
-                            <option value="TR">△</option>
-                            <option value="MA">×</option>
-                            <option value="LB">ABC</option>
-                        </select>
-                        <label>标记类型</label>
-                    </div>  
-                </div>
-
-                <div style="position: absolute; margin-top: 300px; margin-left: -150px;"> 
-                    <div class="switch">
-                        <label>
-                            坐标显示
-                            <input id="coordinateShow" type="checkbox" checked>
-                            <span class="lever"></span>
-                        </label>
-                    </div>
-                    <div class="switch">
-                        <label>
-                            步数显示
-                            <input type="checkbox">
-                            <span class="lever"></span>
-                        </label>
-                    </div>
-                    <div class="switch">
-                        <label>
-                            落子辅助
-                            <input id="promptShow" type="checkbox" checked>
-                            <span class="lever"></span>
-                        </label>
-                    </div>
-                </div>
             </div>
         </div>
+
         <div class="row" style="text-align: center;">
-            <!-- <div class="fixed-action-btn" style="position: relative; right: 0; left: 0; padding-top: 0; bottom: 0; display: inline;">
-                <a class="btn-floating gray" id="modeView">
-                    <i class="large material-icons">repeat</i>
-                </a>
-                <ul>
-                    <li><a class="btn-floating white" onclick="changeMode('w')"></a></li>
-                    <li><a class="btn-floating black" onclick="changeMode('b')"></a></li>
-                    <li><a class="btn-floating gray" onclick="changeMode('repeat')"><i class="material-icons">repeat</i></a></li>
-                </ul>
-            </div> -->
-            <a class="btn-floating waves-effect blue" onclick="sgf.left();">
-                    <i class="material-icons">fast_rewind</i></a>
-            <a class="btn-floating waves-effect blue" onclick="sgf.back();">
-                    <i class="material-icons">arrow_left</i></a>
-            <a class="btn-floating waves-effect green" onclick="sgf.continue();">
-                    <i class="material-icons">arrow_right</i></a>
-            <a class="btn-floating waves-effect green" onclick="sgf.right();">
-                    <i class="material-icons">fast_forward</i></a>
+            <button class="btn waves-effect black-text grey lighten-4" onclick="sgf.left();">快退
+                    <i class="material-icons left">fast_rewind</i></button>
+            <button class="btn waves-effect black-text grey lighten-4" onclick="sgf.back();">后退
+                    <i class="material-icons left">arrow_left</i></button>
+            <button class="btn waves-effect black-text grey lighten-4" onclick="sgf.continue();">前进
+                    <i class="material-icons right">arrow_right</i></button>
+            <button class="btn waves-effect black-text grey lighten-4" onclick="sgf.right();">快进
+                    <i class="material-icons right">fast_forward</i></button>
+        </div>
+    </div>
+
+    <div class="fixed-action-btn">
+        <a class="btn-floating btn-large grey lighten-6" id="menu">
+            <i class="large material-icons">menu</i>
+        </a>
+        <ul>
+            <li><a class="btn-floating red"><i class="material-icons">insert_chart</i></a></li>
+            <li><a class="btn-floating yellow darken-1"><i class="material-icons">format_quote</i></a></li>
+            <li><a class="btn-floating green"><i class="material-icons">publish</i></a></li>
+            <li><a class="btn-floating blue"><i class="material-icons">attach_file</i></a></li>
+        </ul>
+    </div>
+    <div class="tap-target grey lighten-6" data-target="menu">
+        <div class="tap-target-content">
+            <h5>功能按钮</h5>
+            <p> 您可以通过点击此处 </p>
+            <p> 打开本地棋谱，下载棋谱，从云端加载棋谱，保存棋谱到云端 </p>
+        </div>
+    </div>
+
+    <div id="about-modal" class="modal" style="width: 250px;">
+        <div class="modal-content">
+            <h4>关于</h4>
+            <p>前端版本号: 0.1.0</p>
+            <p>内核版本号: 1.0.0</p>
+            <p>发行时间: 2019.11.22</p>
+            <p>Copyright © GoDojo Group</p>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-close waves-effect btn-flat">取消</a>
         </div>
     </div>
 
@@ -100,9 +115,66 @@
     <script src="js/materialize.min.js"></script>
     <script src="GoDojoSGF.bundle.js"></script>
     <script>
+        $('#tree').jstree({
+            core: {
+                data : [
+                    {
+                        type: '#',
+                        text: 'GoDojo SGF Editor',
+                        icon: 'img/logo32.png',
+                        state: {
+                            opened: true
+                        },
+                        children: [
+                            { 
+                                type: 'wstone',
+                                text: '[Q, 4]',
+                                icon: 'img/wstone.png'
+                            },
+                            { 
+                                type: 'bstone',
+                                text: '[R, 6]',
+                                icon: 'img/bstone.png',
+                                children: [
+                                    { 
+                                        type: 'wstone',
+                                        text: '[R, 3]',
+                                        icon: 'img/wstone.png'
+                                    },
+                                ]
+                            },
+                            { 
+                                type: 'wstone',
+                                text: '[O, 3]',
+                                icon: 'img/wstone.png'
+                            },
+                        ]
+                    }
+                ],
+            },
+            types: {
+                '#': {
+                    icon: 'img/logo.png',
+                    valid_children: ['wstone', 'bstone']
+                },
+                wstone: {
+                    icon: 'img/wstone.png',
+                    valid_children: ['wstone', 'bstone']
+                },
+                bstone: {
+                    icon: 'img/bstone.png',
+                    valid_children: ['wstone', 'bstone']
+                }
+            }
+        });
+
         // $('.fixed-action-btn').floatingActionButton({ hoverEnabled: false });
         $('select').formSelect();
-        $('#html1').jstree();
+        $('.sidenav').sidenav();
+        $('.dropdown-trigger').dropdown();
+        $('.tap-target').tapTarget();
+        $('.fixed-action-btn').floatingActionButton({ direction: 'left' });
+        $('.modal').modal();
 
         $('#coordinateShow').on('click', (e) => {
             if (e.currentTarget.checked) {
@@ -120,20 +192,35 @@
             }
         });
 
-        $(':radio[name="mode"]').on('click', (e) => {
+        $('.mode-btn').on('click', (e) => {
+            $('li.mode-radio.active').removeClass('active');
+            $(e.currentTarget.parentElement).addClass('active');
             let mode = e.currentTarget.attributes.rel.value;
-            if (mode == 'mark') {
-                $('#markTypeView').show();
-                mode += $('#markType').val();
-            } else {
-                $('#markTypeView').hide();
-            }
-
             changeMode(mode);
         });
 
-        $('#markType').on('change', (e) => {
-            changeMode(`mark${$('#markType').val()}`);
+        $('.mark-type-btn').on('click', (e) => {
+            let type = e.currentTarget.attributes.rel.value;
+            const mode = `mark${type}`;
+            $('#mark-selector').attr('rel', mode);
+            changeMode(mode);
+            switch (type) {
+                case 'SQ':
+                    $('#mark-selector').text('添加标记: □');
+                    break;
+                case 'CR':
+                    $('#mark-selector').text('添加标记: ○');
+                    break;
+                case 'TR':
+                    $('#mark-selector').text('添加标记: △');
+                    break;
+                case 'MA':
+                    $('#mark-selector').text('添加标记: ×');
+                    break;
+                case 'LB':
+                    $('#mark-selector').text('添加标记: ABC');
+                    break;
+            }
         });
 
         function changeMode(mode) {
@@ -160,10 +247,14 @@
                 window.sgf = SGF.create({
                     data: data
                 });
+                
+                const size = $(document).height() * 0.9;
                 const boardDiv = $('#chessboard');
+                boardDiv.width(size);
+                boardDiv.height(size);
                 window.sgf.showOn('chessboard', {
-                    styleWidth: boardDiv.width(),
-                    styleHeight: boardDiv.height()
+                    styleWidth: size,
+                    styleHeight: size
                 });
             }
         });
