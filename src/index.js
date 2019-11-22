@@ -16,8 +16,8 @@ window.SGF = function (option) {
 
     if (this.boardSize.indexOf(':') > -1) {
         const split = this.boardSize.split(':');
-        this.width = split[0];
-        this.height = split[1];
+        this.width = parseInt(split[0]);
+        this.height = parseInt(split[1]);
     } else {
         this.width = this.height = parseInt(this.boardSize);
     }
@@ -78,6 +78,10 @@ SGF.prototype.showOn = function (id, option) {
     board.setOnRClickListener(this._rclick.bind(this));
 
     this.runtime && this.runtime.setFront(board);
+}
+
+SGF.prototype.resize = function (width, height) {
+    this.runtime && this.runtime.hasFront() && this.runtime.front.resize(width, height);
 }
 
 SGF.prototype._rclick = function () {

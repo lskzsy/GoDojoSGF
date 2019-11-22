@@ -37,6 +37,33 @@ const SGFBoard = function (hook, option = {}) {
     }
 }
 
+SGFBoard.prototype.resize = function (width, height) {
+    this.styleWidth = width;
+    this.styleHeight = height;
+    if (this.styleWidth > 0) { 
+        this.scaleX = this.visableWidth / this.styleWidth;
+    }
+    if (this.styleHeight > 0) {
+        this.scaleY = this.visableHeight / this.styleHeight;
+    }
+    if (this.styleWidth > 0) {
+        this.coordinate.style.width = 
+        this.board.style.width =
+        this.chessLayer.style.width =
+        this.promptLayer.style.width =
+        this.markLayer.style.width =
+        this.workspace.style.width = this.styleWidth + 'px';
+    }
+    if (this.styleHeight > 0) {
+        this.coordinate.style.height =
+        this.board.style.height =
+        this.chessLayer.style.height =
+        this.promptLayer.style.height =
+        this.markLayer.style.height =
+        this.workspace.style.height = this.styleHeight + 'px';
+    }
+}
+
 SGFBoard.prototype._bind = function () {
     this.workspace.onclick = this._onclick.bind(this);
     this.workspace.oncontextmenu = function(event) { 
@@ -118,23 +145,6 @@ SGFBoard.prototype._buildLayerStyle = function (width, height) {
     this.workspace.style.height = height + 'px';
     this.workspace.style.margin = '0';
     this.workspace.style.padding = '0';
-
-    if (this.styleWidth > 0) {
-        this.coordinate.style.width = 
-        this.board.style.width =
-        this.chessLayer.style.width =
-        this.promptLayer.style.width =
-        this.markLayer.style.width =
-        this.workspace.style.width = this.styleWidth + 'px';
-    }
-    if (this.styleHeight > 0) {
-        this.coordinate.style.height =
-        this.board.style.height =
-        this.chessLayer.style.height =
-        this.promptLayer.style.height =
-        this.markLayer.style.height =
-        this.workspace.style.height = this.styleHeight + 'px';
-    }
 }
 
 SGFBoard.prototype._build = function () {
@@ -146,15 +156,19 @@ SGFBoard.prototype._build = function () {
 
     this.scaleX = 1;
     this.scaleY = 1;
-    if (this.styleWidth > 0) { 
-        this.scaleX = this.visableWidth / this.styleWidth;
-    }
-    if (this.styleHeight > 0) {
-        this.scaleY = this.visableHeight / this.styleHeight;
-    }
+    this.resize(this.styleWidth, this.styleHeight);
     this.node = this._getNodes();
  
     const ctx = this.board.getContext('2d');
+
+    ctx.beginPath();
+    ctx.fillStyle = this.background;
+    ctx.rect(
+        this.margin - this.padding / 2, this.margin - this.padding / 2, 
+        this.boardWidth + this.padding, this.boardHeight + this.padding);
+    ctx.fill();
+    ctx.closePath();
+
     ctx.strokeStyle = this.lineColor;
     for (let i = 0, x = this.margin, y = this.margin; i < this.width; i++) {
         ctx.beginPath();
@@ -210,7 +224,7 @@ SGFBoard.prototype._drawStar = function (ctx, loc) {
 
 SGFBoard.prototype._drawCoordinate = function () {
     const ctx = this.coordinate.getContext('2d');
-    ctx.font = `${parseInt(this.padding * 2 / 3) - 1}px bold Apercu`;
+    ctx.font = `${parseInt(this.padding / 2) - 1}px bold Apercu`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (let i = 0, c='A'; i < this.width; i++) {
@@ -218,16 +232,16 @@ SGFBoard.prototype._drawCoordinate = function () {
             i--;
         } else {
             const loc = this.node.get(i, 0);
-            ctx.fillText(c, loc.x, this.padding - 2, this.padding - 2);
-            ctx.fillText(c, loc.x, this.visableHeight - this.padding + 2, this.padding - 2);
+            ctx.fillText(c, loc.x, this.padding * 2 / 3, this.padding - 2);
+            ctx.fillText(c, loc.x, this.visableHeight - this.padding * 2 / 3, this.padding - 2);
         }
         c = String.fromCharCode(c.charCodeAt() + 1);
     }
 
     for (let i = 0; i < this.height; i++) {
         const loc = this.node.get(0, i);
-        ctx.fillText(i + 1, this.padding - 2, loc.y,  this.padding - 2);
-        ctx.fillText(i + 1, this.visableWidth - this.padding + 2, loc.y, this.padding - 2);
+        ctx.fillText(i + 1, this.padding * 2 / 3, loc.y,  this.padding - 2);
+        ctx.fillText(i + 1, this.visableWidth - this.padding * 2 / 3, loc.y, this.padding - 2);
     }
 }
 
@@ -253,7 +267,7 @@ SGFBoard.prototype._drawObject = function (x, y, type, prompt = false) {
         ctx.fill();
         ctx.stroke();
     } else if (type.length == 1 && type >= 'A' && type <= 'Z') {
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = this.background;
         ctx.beginPath();
         ctx.arc(loc.x, loc.y, this.padding / 3, 0, 2 * Math.PI);
         ctx.closePath();

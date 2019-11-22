@@ -7,7 +7,7 @@
     <link href="css/jstree.min.css" rel="stylesheet">
 </head>
 <body>
-    <ul class="sidenav sidenav-fixed" style="width: 150px">
+    <ul class="sidenav sidenav-fixed" style="width: 160px;">
         <li style="text-align: center; height: 100px;">
             <img src="img/logo.png" width="100" height="100"></li>
         <li><div class="divider"></div></li>
@@ -57,23 +57,29 @@
         <li><a onclick="$('#about-modal').modal('open');">关于</a></li>
     </ul>
 
-    <div id="tree" style="float: right; margin-top: 20px; margin-right: 120px;">
+    <div style="float: right; text-align: right;">
+        <button class="waves-effect black-text grey lighten-4 btn" style="margin: 20px;"> 
+            <i class="material-icons left">person</i> 登录/注册 </button>
+        
+        <div class="card" style="margin-top: 0px; margin-right: 20px; text-align: left;">
+            <div class="card-content" id="tree">
+            </div>
+        </div>
     </div>
-
     <div class="container">
-        <div class="row">
+        <div class="row" style="margin-bottom: 0;">
             <div id="chessboard" style="margin: 0 auto; width: 400px; height: 400px;">
             </div>
         </div>
 
         <div class="row" style="text-align: center;">
-            <button class="btn waves-effect black-text grey lighten-4" onclick="sgf.left();">快退
+            <button class="btn waves-effect black-text grey lighten-4" onclick="sgf && sgf.left();">快退
                     <i class="material-icons left">fast_rewind</i></button>
-            <button class="btn waves-effect black-text grey lighten-4" onclick="sgf.back();">后退
+            <button class="btn waves-effect black-text grey lighten-4" onclick="sgf && sgf.back();">后退
                     <i class="material-icons left">arrow_left</i></button>
-            <button class="btn waves-effect black-text grey lighten-4" onclick="sgf.continue();">前进
+            <button class="btn waves-effect black-text grey lighten-4" onclick="sgf && sgf.continue();">前进
                     <i class="material-icons right">arrow_right</i></button>
-            <button class="btn waves-effect black-text grey lighten-4" onclick="sgf.right();">快进
+            <button class="btn waves-effect black-text grey lighten-4" onclick="sgf && sgf.right();">快进
                     <i class="material-icons right">fast_forward</i></button>
         </div>
     </div>
@@ -110,43 +116,82 @@
         </div>
     </div>
 
+    <div id="begin-modal" class="modal" style="width: 300px;">
+        <div class="modal-content">
+            <h4>开始</h4>
+            <div class="divider"></div>
+            <div style="margin-top: 20px; margin-bottom: 20px; text-align: center;">
+                <div class="row">
+                    <a class="btn waves-effect black-text grey lighten-4 begin-btn" rel="new">
+                        <i class="material-icons left">open_in_new</i>创建新棋谱</a>
+                </div>
+                <div class="row">
+                    <a class="btn waves-effect black-text grey lighten-4 begin-btn" rel="local">
+                        <i class="material-icons left">folder_open</i>从本地打开</a>
+                </div>
+                <div class="row">
+                    <a class="btn waves-effect black-text grey lighten-4 begin-btn" rel="cloud">
+                        <i class="material-icons left">cloud_download</i>从云端下载</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="new-modal" class="modal" style="width: 300px;">
+        <div class="modal-content">
+            <h4>创建新棋谱</h4>
+            <div class="divider"></div>
+            <div class="row" style="margin-bottom: 0px;">
+                <div class="input-field col s6">
+                    <input value="19" id="board-width-text" type="number" class="validate">
+                    <label for="first_name">棋盘长</label>
+                </div>
+                <div class="input-field col s6">
+                    <input value="19" id="board-height-text" type="number" class="validate">
+                    <label for="last_name">棋盘宽</label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a class="waves-effect btn-flat" onclick="newBoard();">创建</a>
+            <a class="modal-close waves-effect btn-flat">取消</a>
+        </div>
+    </div>
+
     <script src="js/jquery.min.js"></script>
     <script src="js/jstree.min.js"></script>
     <script src="js/materialize.min.js"></script>
     <script src="GoDojoSGF.bundle.js"></script>
     <script>
+        window.sgf = false;
+
         $('#tree').jstree({
             core: {
                 data : [
                     {
                         type: '#',
                         text: 'GoDojo SGF Editor',
-                        icon: 'img/logo32.png',
                         state: {
                             opened: true
                         },
                         children: [
                             { 
                                 type: 'wstone',
-                                text: '[Q, 4]',
-                                icon: 'img/wstone.png'
+                                text: '[Q, 4]'
                             },
                             { 
                                 type: 'bstone',
                                 text: '[R, 6]',
-                                icon: 'img/bstone.png',
                                 children: [
                                     { 
                                         type: 'wstone',
-                                        text: '[R, 3]',
-                                        icon: 'img/wstone.png'
+                                        text: '[R, 3]'
                                     },
                                 ]
                             },
                             { 
                                 type: 'wstone',
-                                text: '[O, 3]',
-                                icon: 'img/wstone.png'
+                                text: '[O, 3]'
                             },
                         ]
                     }
@@ -154,7 +199,7 @@
             },
             types: {
                 '#': {
-                    icon: 'img/logo.png',
+                    icon: 'img/logo32.png',
                     valid_children: ['wstone', 'bstone']
                 },
                 wstone: {
@@ -165,7 +210,19 @@
                     icon: 'img/bstone.png',
                     valid_children: ['wstone', 'bstone']
                 }
-            }
+            },
+            contextmenu: {
+                items: {
+                    delete: {
+                        label: '删除',
+                        action: function () {
+                        }
+                    }
+                }
+            },
+            plugins: [
+                "contextmenu", "types", "wholerow"
+            ]
         });
 
         // $('.fixed-action-btn').floatingActionButton({ hoverEnabled: false });
@@ -174,21 +231,46 @@
         $('.dropdown-trigger').dropdown();
         $('.tap-target').tapTarget();
         $('.fixed-action-btn').floatingActionButton({ direction: 'left' });
-        $('.modal').modal();
+        $('.modal').modal({ dismissible: false });
+
+        $('#begin-modal').modal('open');
+
+        window.onresize = function() {
+            const size = $(document).height() * 0.9;
+            const boardDiv = $('#chessboard');
+            boardDiv.width(size);
+            boardDiv.height(size);
+            sgf && sgf.resize(size, size);
+        }
+        window.onresize();
+
+        $('.begin-btn').on('click', (e) => {
+            const type = e.currentTarget.attributes.rel.value;
+            switch (type) {
+                case 'new': 
+                    $('#new-modal').modal('open');
+                    break;
+                case 'local': 
+                    localBoard();
+                    break;
+                case 'cloud':
+                    break;
+            }
+        });
 
         $('#coordinateShow').on('click', (e) => {
             if (e.currentTarget.checked) {
-                sgf.showCoordinate();
+                sgf && sgf.showCoordinate();
             } else {
-                sgf.hideCoordinate();
+                sgf && sgf.hideCoordinate();
             }
         });
 
         $('#promptShow').on('click', (e) => {
             if (e.currentTarget.checked) {
-                sgf.showPrompt();
+                sgf && sgf.showPrompt();
             } else {
-                sgf.hidePrompt();
+                sgf && sgf.hidePrompt();
             }
         });
 
@@ -237,27 +319,40 @@
                     M.toast({html: '交替落子', displayLength: 1500});
                     break;
             }
-            sgf.setInputMode(mode);
+            sgf && sgf.setInputMode(mode);
         }
 
-        $.ajax({
-            url: 'sgf/test.sgf',
-            type: 'GET',
-            success: (data) => {
-                window.sgf = SGF.create({
-                    data: data
-                });
-                
-                const size = $(document).height() * 0.9;
-                const boardDiv = $('#chessboard');
-                boardDiv.width(size);
-                boardDiv.height(size);
-                window.sgf.showOn('chessboard', {
-                    styleWidth: size,
-                    styleHeight: size
-                });
-            }
-        });
+        function newBoard() {
+            const width = $('#board-width-text').val();
+            const height = $('#board-height-text').val();
+            const size = width == height ? width : `${width}:${height}`;
+            window.sgf = SGF.create({ boardSize: size });
+            window.sgf.showOn('chessboard', {
+                background: '#FFBA75'
+            });
+            window.onresize();
+            $('#new-modal').modal('close');
+            $('#begin-modal').modal('close');
+        }
+
+        function localBoard() {
+            const reader = $('<input style="display: none;" type="file" accept=".sgf">');
+            reader.on('change', (e) => {
+                const file = e.currentTarget.files[0];
+                const fileReader = new FileReader();
+                fileReader.readAsText(file);
+                fileReader.onload = ee => {
+                    const sgfData = ee.target.result;
+                    window.sgf = SGF.create({ data: sgfData });
+                    window.sgf.showOn('chessboard', {
+                        background: '#FFBA75'
+                    });
+                    window.onresize();
+                    $('#begin-modal').modal('close');
+                }
+            });
+            reader.click();
+        }
     </script>
 </body>
 </html>
