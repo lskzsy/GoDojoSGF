@@ -7,7 +7,7 @@
 [![jquery version][jquery-image]][jquery-url]
 [![release][release-image]][release-url]
 
-[license-image]: https://img.shields.io/badge/license-MIT-green 
+[license-image]: https://img.shields.io/badge/license-GPLv3-green 
 [license-url]: LICENSE
 [node-image]: https://img.shields.io/badge/node.js-%3E=_8.1-green
 [node-url]: https://nodejs.org/download/
