@@ -12,6 +12,10 @@ const SGFRuntime = function () {
 
     this.width = 0;
     this.height = 0;
+
+    this.onStoneCreated = null;
+    this.onStoneDeleted = null;
+    this.onBranchMove = null;
     
     this.mode = 'repeat';
 }
@@ -58,12 +62,12 @@ SGFRuntime.prototype.kill = function (chesses) {
 SGFRuntime.prototype.backLife = function () {
     const dead = this.killBy[this.currentStep];
     if (dead) {
-        dead.forEach(d => {  this.currentStep--; this.putChess(d); });
+        dead.forEach(d => {  this.currentStep--; this.putStone(d); });
         this.killBy[this.currentStep] = false;
     }
 }
 
-SGFRuntime.prototype.putChess = function (chess, isNew=false) {
+SGFRuntime.prototype.putStone = function (chess, isNew=false) {
     if (this.board[chess.x][chess.y] === '' 
             && !GoRule.isAsphyxiating(this, chess.x, chess.y, chess.color)) {
         this.currentStep++;

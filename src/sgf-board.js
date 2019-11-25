@@ -69,7 +69,9 @@ SGFBoard.prototype._bind = function () {
     this.workspace.oncontextmenu = function(event) { 
         event.preventDefault(); 
         const pos = this._clickLoc(event);
-        this.runtime.onRClickListeners.forEach(listener => listener(pos.x, pos.y)); 
+        if (this.runtime.onRClickListener) {
+            this.runtime.onRClickListener(pos.x, pos.y);
+        }
     }.bind(this);
 
     this.promptX = -1;
@@ -164,8 +166,8 @@ SGFBoard.prototype._build = function () {
     ctx.beginPath();
     ctx.fillStyle = this.background;
     ctx.rect(
-        this.margin - this.padding / 2, this.margin - this.padding / 2, 
-        this.boardWidth + this.padding, this.boardHeight + this.padding);
+        this.margin - this.padding * 2 / 3, this.margin - this.padding * 2 / 3, 
+        this.boardWidth + this.padding * 4 / 3, this.boardHeight + this.padding * 4 / 3);
     ctx.fill();
     ctx.closePath();
 
@@ -338,9 +340,15 @@ SGFBoard.prototype.putMark = function (mark) {
     this._drawObject(mark.x, mark.y, type);
 }
 
-SGFBoard.prototype.clearMark = function () {
+SGFBoard.prototype.clearMark = function (x=-1, y=-1) {
     const ctx = this.markLayer.getContext('2d');
-    ctx.clearRect(0, 0, this.board.width, this.board.height);
+    if (x >= 0 && y >= 0) {
+        const loc = this.node.get(x, y);
+        const r = this.padding / 2;
+        ctx.clearRect(loc.x - r, loc.y - r, this.padding, this.padding);
+    } else {
+        ctx.clearRect(0, 0, this.board.width, this.board.height);
+    }
 }
 
 SGFBoard.prototype.delete = function (x, y, prompt = false) {

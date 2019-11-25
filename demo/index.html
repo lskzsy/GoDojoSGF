@@ -8,7 +8,7 @@
 </head>
 <body>
     <ul class="sidenav sidenav-fixed" style="width: 160px;">
-        <li style="text-align: center; height: 100px;">
+        <li style="text-align: center; height: 100px; padding-top: 5px;">
             <img src="img/logo.png" width="100" height="100"></li>
         <li><div class="divider"></div></li>
         <li><a class="subheader">落子模式</a></li>
@@ -61,7 +61,7 @@
         <button class="waves-effect black-text grey lighten-4 btn" style="margin: 20px;"> 
             <i class="material-icons left">person</i> 登录/注册 </button>
         
-        <div class="card" style="margin-top: 0px; margin-right: 20px; text-align: left;">
+        <div id="tree-card" class="card" style="margin-top: 0px; margin-right: 20px; width: 250px; text-align: left; overflow: auto;">
             <div class="card-content" id="tree">
             </div>
         </div>
@@ -167,33 +167,17 @@
 
         $('#tree').jstree({
             core: {
+                check_callback: true,
                 data : [
                     {
+                        id: '0',
                         type: '#',
                         text: 'GoDojo SGF Editor',
                         state: {
-                            opened: true
+                            opened: true,
+                            selected: true
                         },
-                        children: [
-                            { 
-                                type: 'wstone',
-                                text: '[Q, 4]'
-                            },
-                            { 
-                                type: 'bstone',
-                                text: '[R, 6]',
-                                children: [
-                                    { 
-                                        type: 'wstone',
-                                        text: '[R, 3]'
-                                    },
-                                ]
-                            },
-                            { 
-                                type: 'wstone',
-                                text: '[O, 3]'
-                            },
-                        ]
+                        children: []
                     }
                 ],
             },
@@ -241,6 +225,7 @@
             boardDiv.width(size);
             boardDiv.height(size);
             sgf && sgf.resize(size, size);
+            $('#tree-card').height($(document).height() * 0.7);
         }
         window.onresize();
 
@@ -327,10 +312,7 @@
             const height = $('#board-height-text').val();
             const size = width == height ? width : `${width}:${height}`;
             window.sgf = SGF.create({ boardSize: size });
-            window.sgf.showOn('chessboard', {
-                background: '#FFBA75'
-            });
-            window.onresize();
+            sgfBeginning();
             $('#new-modal').modal('close');
             $('#begin-modal').modal('close');
         }
@@ -344,15 +326,150 @@
                 fileReader.onload = ee => {
                     const sgfData = ee.target.result;
                     window.sgf = SGF.create({ data: sgfData });
-                    window.sgf.showOn('chessboard', {
-                        background: '#FFBA75'
-                    });
-                    window.onresize();
+                    sgfBeginning();
                     $('#begin-modal').modal('close');
                 }
             });
             reader.click();
         }
+
+        function translateX(x) {
+            const a = 'A'.charCodeAt();
+            if (x >= 8) {
+                x++;
+            }
+            return String.fromCharCode(a + x);
+        }
+
+        function sgfBeginning() {
+            window.sgf.showOn('chessboard', {
+                background: '#FFBA75'
+            });
+            window.onresize();
+            window.sgf.onStoneCreated(onStoneCreated);
+            window.sgf.onStoneDeleted(onStoneDeleted);
+        }
+
+        function onStoneCreated(steps, stone) {
+            const tree = $('#tree').jstree();
+            let id = '0';
+            for (let i = 0; i < steps.length - 1; i++) {
+                id += steps[i];
+            }
+            let cur = id;
+            let nid = id + steps[steps.length - 1];
+            if (!tree.get_node(id)) {
+                cur = id.substring(0, id.lastIndexOf('_'));    
+                const br = id.substring(id.lastIndexOf('_') + 1);
+                const last = cur + '_' + (br - 1);
+                const next = cur + '_' + (parseInt(br) + 1);
+                if (tree.get_node(last + 0)) {
+                    tree.set_id(last + 0, last);
+                    let j = 1;
+                    while (tree.get_node(last + j)) {
+                        tree.move_node(last + j, last, 'last', false);
+                        j++;
+                    }
+                    nid = cur + '_' + br;
+                } else if (tree.get_node(last)) {
+                    nid = cur + '_' + br;
+                } else if (tree.get_node(next) || tree.get_node(next + 0)) {
+                    cur = '0';
+                    for (let i = 0; steps.length - 2 >= 0 && i < steps.length - 2; i++) {
+                        cur += steps[i];
+                    }
+                }
+            }
+            console.log('TREE_INSERT', id, cur, nid);
+            tree.create_node(cur, {
+                id: nid, 
+                type: `${stone.color}stone`, 
+                text: `[${translateX(stone.x)}, ${stone.y + 1}]`
+            }, 'last', false, true);
+            tree.deselect_all();
+            tree.select_node(nid);
+            $('#tree-card').animate({ scrollTop: $(`#${nid}_anchor`).position().top }, 100);
+            $('#tree-card').animate({ scrollLeft: $(`#${nid}_anchor`).position().left }, 100);
+        }
+
+        function onStoneDeleted(steps) {
+            const tree = $('#tree').jstree();
+            let id = '0';
+            let next = '0';
+            for (let i = 0; i < steps.length; i++) {
+                id += steps[i];
+            }
+            console.log('TREE_DELETE', id);
+            if (tree.get_node(id)) {
+                tree.delete_node(id);
+            } else if (id[id.length - 1] == '0' && tree.get_node(id.substr(0, id.length - 1))) {
+                tree.delete_node(id.substr(0, id.length - 1));
+            }
+        }
+
+        function updateTree() {
+            if (sgf) {
+                clearTree();
+                const status = sgf.runtime.root;
+                const runtime = {
+                    step: 0,
+                    history: [],
+                    branch: status
+                };
+                doUpdateTree(runtime);
+            }
+        }
+
+        function doUpdateTree(runtime) {
+            const tree = $('#tree').jstree();
+            for (let i = 0; i < runtime.branch.length; i++) {
+                const stone = runtime.branch[i];
+                if (stone instanceof Array) {
+                    runtime.history.push({
+                        branch: runtime.branch,
+                        step: runtime.step - 1,
+                        select: i
+                    });
+                    runtime.branch = runtime.branch[i];
+                    runtime.step = 0;
+                    doUpdateTree(runtime);
+                    const history = runtime.history.pop();
+                    runtime.branch = history.branch;
+                    runtime.step = i;
+                } else {
+                    const steps = [];
+                    runtime.history.forEach(h => {steps.push(`${h.step}_${h.select}`)});
+                    steps.push(runtime.step < 0 ? 0 : runtime.step);
+                    onStoneCreated(steps, stone);
+                    runtime.step++;
+                }
+            }
+        }
+
+        function clearTree() {
+            const tree = $('#tree').jstree();
+            const json = tree.get_json();
+            return tree.delete_node(doClearTree(json[0].children));
+        }
+
+        function doClearTree(array) {
+            const deleted = [];
+            array.forEach(node => {
+                let children = [];
+                if (node.children.length > 0) {
+                    children = doClearTree(children);
+                }
+                children.forEach(id => deleted.push(id));
+                deleted.push(node.id);
+            });
+            return deleted;
+        }
+
+        // $(window).bind('beforeunload', leaveWarnning);
+        // function leaveWarnning(e) {
+        //     e.returnValue = '棋谱还未保存，确认离开页面？';
+        //     return e.returnValue;
+        // }
     </script>
 </body>
 </html>

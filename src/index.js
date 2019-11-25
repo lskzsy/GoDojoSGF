@@ -2,7 +2,6 @@ const SGFBoard = require('./sgf-board');
 const SGFRuntime = require('./sgf-runtime');
 const SGFConvertor = require('./sgf-convertor');
 const SGFBranch = require('./sgf-branch');
-const GoRule = require('./go-rule');
 
 window.SGF = function (option) {
     this.encoding = option.encoding || 'utf-8';
@@ -11,6 +10,7 @@ window.SGF = function (option) {
     this.fileFormat = option.fileFormat || 1;
     this.gameMode = option.gameMode || 1;
 
+    this.convertor = new SGFConvertor();
     this.runtime = new SGFRuntime();
     this.data = [];
 
@@ -23,8 +23,7 @@ window.SGF = function (option) {
     }
 
     if (option.data) {
-        const convertor = new SGFConvertor();
-        const info = convertor.do(option.data);
+        const info = this.convertor.do(option.data);
         if (info) {
             //  root info
             const root = info.root;
@@ -85,10 +84,7 @@ SGF.prototype.resize = function (width, height) {
 }
 
 SGF.prototype._rclick = function () {
-    if (step > -1) {
-        const stone = this.runtime.branch[this.runtime.step];
-        this.branch.delete(stone);
-    }  
+    this.branch.recall();
 }
 
 SGF.prototype._click = function (x, y) {
@@ -99,7 +95,7 @@ SGF.prototype._click = function (x, y) {
         if (mode == 'w' || mode == 'b') {
             this.runtime.select = mode;
         }
-        this.runtime.putChess({
+        this.runtime.putStone({
             x: x,
             y: y,
             color: this.runtime.select
@@ -135,4 +131,16 @@ SGF.prototype.hidePrompt = function () {
 
 SGF.prototype.showPrompt = function () {
     this.runtime.hasFront() && this.runtime.front.showPrompt();
+}
+
+SGF.prototype.onStoneCreated = function (listener) {
+    this.runtime.onStoneCreated = listener;
+}
+
+SGF.prototype.onStoneDeleted = function (listener) {
+    this.runtime.onStoneDeleted = listener;
+}
+
+SGF.prototype.onBranchMove = function (listener) {
+    this.runtime.onBranchMove = listener;
 }

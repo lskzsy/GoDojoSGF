@@ -33,29 +33,32 @@ SGFBranch.prototype.insertMark = function (x, y, type) {
 }
 
 SGFBranch.prototype.insert = function (x, y, c) {
-    const chess = {
+    const stone = {
         color: c,
         x: x,
         y: y,
         marks: null
     };
-    this.runtime.data.push(chess);
+    this.runtime.data.push(stone);
     const step = ++this.step;
+    let created = true;
     if (step < this.branch.length) {
         const cur = this.branch[step];
         if (!(cur instanceof Array)) {
-            if (cur.x != chess.x || cur.y != chess.y || cur.color != chess.color) {
+            if (cur.x != stone.x || cur.y != stone.y || cur.color != stone.color) {
                 const old = this.branch.splice(step);
                 this.branch.push(old);
-                this.branch.push([chess]);
+                this.branch.push([stone]);
                 this._nextBranch(step, this.branch.length - 1);
+            } else {
+                created = false;
             }
         } else {
             const branch = this.branch;
             let selected = false;
             for (let i = step; i < branch.length; i++) {
                 const cur = branch[i][0];
-                if (cur.x == chess.x && cur.y == chess.y && cur.color == chess.color) {
+                if (cur.x == stone.x && cur.y == stone.y && cur.color == stone.color) {
                     // select branch
                     selected = true;
                     this._nextBranch(step, i);
@@ -63,14 +66,22 @@ SGFBranch.prototype.insert = function (x, y, c) {
             }
             if (!selected) {
                 // new branch
-                this.branch.push([chess]);
+                this.branch.push([stone]);
                 this._nextBranch(step, this.branch.length - 1);
+            } else {
+                created = false;
             }
             this._clearBranchMark();
         }
         this._checkBranch(this.step); 
     } else {
-        this.branch.push(chess);
+        this.branch.push(stone);
+    }
+    if (created) {
+        const steps = [];
+        this.history.forEach(h => {steps.push(`${h.step}_${h.select}`)});
+        steps.push(this.step < 0 ? 0 : this.step);
+        this.runtime.onStoneCreated && this.runtime.onStoneCreated(steps, stone);
     }
 }
 
@@ -79,7 +90,7 @@ SGFBranch.prototype.continue = function () {
     if (step < this.branch.length) {
         const cur = this.branch[step];
         if (!(cur instanceof Array)) {
-            this.runtime.putChess(cur);
+            this.runtime.putStone(cur);
 
             return this._checkBranch(step);
         } else {
@@ -100,13 +111,13 @@ SGFBranch.prototype.back = function() {
     const step = this.step;
     let flag = false;
     if (step > -1) {
-        const chess = this.branch[step];
-        this.runtime.select = this.runtime.board[chess.x][chess.y];
+        const stone = this.branch[step];
+        this.runtime.select = this.runtime.board[stone.x][stone.y];
         this.runtime.hasFront() && 
-        this.runtime.front.select(this.runtime.board[chess.x][chess.y]);
+        this.runtime.front.select(this.runtime.board[stone.x][stone.y]);
 
-        this.runtime.board[chess.x][chess.y] = '';
-        this.runtime.hasFront() && this.runtime.front.delete(chess.x, chess.y);
+        this.runtime.board[stone.x][stone.y] = '';
+        this.runtime.hasFront() && this.runtime.front.delete(stone.x, stone.y);
 
         this.runtime.backLife();
         this.runtime.currentStep--;
@@ -143,12 +154,41 @@ SGFBranch.prototype.checkMark = function () {
 SGFBranch.prototype._nextBranch = function (step, i) {
     this.history.push({
         branch: this.branch,
-        step: step - 1
+        step: step - 1,
+        select: i
     });
     this.branch = this.branch[i];
     this.step = 0;
 }
 
+SGFBranch.prototype.recall = function () {
+    if (this.step >= 0 && this.step == this.branch.length - 1) {
+        const currentMarks = this.branch[this.step].marks;
+        if (currentMarks && currentMarks.length > 0) {
+            const del = currentMarks.splice(currentMarks.length - 1); 
+            this.runtime.hasFront() && this.runtime.front.clearMark(del[0].x, del[0].y);               
+        } else {
+            let split = this.step;
+            if (this.step == 0 && this.history.length > 0) {
+                const history = this.history[this.history.length - 1];
+                split = history.select;
+            }
+            const steps = [];
+            this.history.forEach(h => {steps.push(`${h.step}_${h.select}`)});
+            steps.push(this.step);
+            this.back();
+            this._clearBranchMark();
+            this.branch.splice(split, 1);
+            const last = this.branch.length - 1;
+            if ((this.branch[last] instanceof Array) && (last == 0 || 
+                !(this.branch[last - 1] instanceof Array))) {
+                const only = this.branch.splice(last);
+                only[0].forEach(stone => this.branch.push(stone));
+            }
+            this.runtime.onStoneDeleted && this.runtime.onStoneDeleted(steps);
+        }
+    }
+}
 
 SGFBranch.prototype._checkBranch = function (step) {
     // console.log(this.runtime.hasFront());

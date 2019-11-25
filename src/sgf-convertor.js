@@ -20,6 +20,44 @@ SGFConvertor.prototype.do = function (sgfData) {
     }
 }
 
+SGFConvertor.prototype.to = function (sgf) {
+    const data = this._toString(sgf.runtime.root);
+    return `(;CA[${sgf.encoding}]SZ[${sgf.boardSize}]AP[${sgf.application}]${data})`;
+}
+
+SGFConvertor.prototype._toString = function (raw) {
+    const a = 'a'.charCodeAt();
+    let data = '';
+    raw.forEach(stone => {
+        if (stone instanceof Array) {
+            data += `(${this._toString(stone)})`;
+        } else {
+            data += `;${stone.color.toUpperCase()}[${String.fromCharCode(a + stone.x)}${String.fromCharCode(a + stone.y)}]`;
+            if (stone.marks && stone.marks.length > 0) {
+                const markSet = {};
+                stone.marks.forEach(mark => {
+                    if (!markSet[mark.type]) {
+                        markSet[mark.type] = [];
+                    }
+                    markSet[mark.type].push(mark);
+                });
+                for (let k in markSet) {
+                    const v = markSet[k];
+                    data += k;
+                    v.forEach(vv => {
+                        if (vv.type == 'LB') {
+                            data += `[${String.fromCharCode(a + vv.x)}${String.fromCharCode(a + vv.y)}:${vv.d}]`;
+                        } else {
+                            data += `[${String.fromCharCode(a + vv.x)}${String.fromCharCode(a + vv.y)}]`;
+                        }
+                    });
+                }
+            }  
+        }
+    });
+    return data;
+}
+
 SGFConvertor.prototype._scan = function (rawData) {
     const symbolMap = {};
     const stack = [];
