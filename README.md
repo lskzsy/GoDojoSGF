@@ -83,6 +83,12 @@ sgf.setInputMode('markMA');     /* put cross flag */
 sgf.setInputMode('markLB');     /* put letter flag */
 ```
 
+Put stone on board:
+
+```javascript
+sgf.putStone(1, 5); /* put stone or mark on board, arguments is x and y for coordination */
+```
+
 Show/hide board coordinate:
 
 ```javascript
