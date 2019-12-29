@@ -103,6 +103,10 @@ SGF.prototype._click = function (x, y) {
     }  
 }
 
+SGF.prototype.putStone = function (x, y) {
+    this._click(x, y);
+}
+
 SGF.prototype.setInputMode = function (mode) {
     this.runtime.mode = mode;
     if (mode == 'w' || mode == 'b') {
