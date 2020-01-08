@@ -1,37 +1,54 @@
 const GoRule = function (runtime) {
     this.runtime = runtime;
-    this.width = runtime.width;
-    this.height = runtime.height;
+
+    this.lastKill = null
+    this.lastPut = null
 }
 
-GoRule.isAsphyxiating = function (runtime, x, y, c) {
-    const rule = new GoRule(runtime);
-    return rule._isAsphyxiating(x, y, c);
-}
-
-GoRule.prototype._isAsphyxiating = function (x, y, c) {
+GoRule.prototype.isAsphyxiating = function (x, y, c) {
     this.runtime.board[x][y] = c;
     this._clearDead(x, y, c);
-    const breach = !this._searchBreath(x, y);
+    const breach = this._searchBreath(x, y);
+    if (breach) {
+        this.lastPut = {
+            x: x,
+            y: y
+        }
+    }
     this.runtime.board[x][y] = '';
-    return breach;
+    return !breach;
 }
 
 GoRule.prototype._clearDead = function (x, y, c) {
     const xx = [0, 1, 0, -1];
     const yy = [1, 0, -1, 0];
   
+    let clear = []
     for (let i = 0; i < 4; i++) {
         const xt = x + xx[i];
         const yt = y + yy[i];
 
-        if (xt >= 0 && xt < this.width && yt >= 0 && yt < this.height
+        if (xt >= 0 && xt < this.runtime.width && yt >= 0 && yt < this.runtime.height
             && this.runtime.boardPass(xt, yt, c)) {
             const chesses = [];
             if (!this._searchBreath(xt, yt, chesses)) {
-                this.runtime.kill(chesses);
+                clear = clear.concat(chesses);
             }
         }
+    }
+
+    if (clear.length > 0) {
+        let isomorph = false;
+        // console.log(this.lastPut, this.lastKill, clear[0], x, y);
+        if (this.lastPut != null && this.lastKill != null && clear.length == 1) {
+            isomorph = clear[0].x == this.lastPut.x && clear[0].y == this.lastPut.y
+            && x == this.lastKill.x && y == this.lastKill.y;
+        }
+
+        if (!(this.runtime.isKo && isomorph)) {
+            this.lastKill = clear.length == 1 ? clear[0] : null;
+            this.runtime.kill(clear);
+        } 
     }
 }
 
@@ -53,7 +70,7 @@ GoRule.prototype._searchBreath = function (x, y, chesses = []) {
             const xt = cur.x + xx[i];
             const yt = cur.y + yy[i];
 
-            if (!visited[`${xt}:${yt}`] && xt >= 0 && xt < this.width && yt >= 0 && yt < this.height) {
+            if (!visited[`${xt}:${yt}`] && xt >= 0 && xt < this.runtime.width && yt >= 0 && yt < this.runtime.height) {
                 visited[`${xt}:${yt}`] = true;
                 const chess = this.runtime.board[xt][yt];
                 if (chess == c) {

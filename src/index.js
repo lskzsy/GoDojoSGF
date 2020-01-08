@@ -9,9 +9,10 @@ window.SGF = function (option) {
     this.application = 'GoDojoSGF:1.0.0';
     this.fileFormat = option.fileFormat || 1;
     this.gameMode = option.gameMode || 1;
+    this.isKo = option.isKo || false
 
     this.convertor = new SGFConvertor();
-    this.runtime = new SGFRuntime();
+    this.runtime = new SGFRuntime(this.isKo);
     this.data = [];
 
     if (this.boardSize.indexOf(':') > -1) {

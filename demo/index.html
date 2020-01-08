@@ -311,7 +311,7 @@
             const width = $('#board-width-text').val();
             const height = $('#board-height-text').val();
             const size = width == height ? width : `${width}:${height}`;
-            window.sgf = SGF.create({ boardSize: size });
+            window.sgf = SGF.create({ boardSize: size, isKo: true });
             sgfBeginning();
             $('#new-modal').modal('close');
             $('#begin-modal').modal('close');

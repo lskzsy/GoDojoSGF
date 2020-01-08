@@ -1,10 +1,11 @@
 const GoRule = require('./go-rule');
 
-const SGFRuntime = function () {
+const SGFRuntime = function (isKo) {
     this.currentStep = 0;
     this.board = [];
     this.front = null;
     this.select = 'b';
+    this.isKo = isKo
 
     this.data = [];
     this.killBy = {};
@@ -18,6 +19,8 @@ const SGFRuntime = function () {
     this.onBranchMove = null;
     
     this.mode = 'repeat';
+
+    this.goRule = new GoRule(this);
 }
 
 SGFRuntime.prototype.setFront = function (front) {
@@ -69,7 +72,7 @@ SGFRuntime.prototype.backLife = function () {
 
 SGFRuntime.prototype.putStone = function (chess, isNew=false) {
     if (this.board[chess.x][chess.y] === '' 
-            && !GoRule.isAsphyxiating(this, chess.x, chess.y, chess.color)) {
+            && !this.goRule.isAsphyxiating(chess.x, chess.y, chess.color)) {
         this.currentStep++;
         if (isNew) {
             this.branch.insert(chess.x, chess.y, chess.color);
