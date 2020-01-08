@@ -26,7 +26,7 @@ git clone https://github.com/lskzsy/GoDojoSGF.git
 cd GoDojoSGF
 npm install
 ```
-Building `GoDojoSGF.bunndle.js`, which can used on other project:
+Building `GoDojoSGF.bundle.js`, which can used on other project:
 
 ```shell
 npm run build
@@ -50,6 +50,7 @@ const sgf = SGF.create({
     encoding: 'utf-8',  /* optional, default is 'utf-8' */
     application: '',    /* optional, SGF editor information */
     data: '',           /* optional, exists SGF data, the data will cover other configure */
+    isKo: false,        /* optional, default is false. */
 });
 ```
 
