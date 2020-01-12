@@ -119,6 +119,12 @@ Resize board:
 sgf.resize($(document).width(), $(document).height());
 ```
 
+Save SGF state:
+
+```javascript
+sgf.save(); // return sgf format string 
+```
+
 Listen SGF state:
 
 ```javascript
