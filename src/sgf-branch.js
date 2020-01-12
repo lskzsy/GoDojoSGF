@@ -103,10 +103,6 @@ SGFBranch.prototype.continue = function () {
     }
 }
 
-SGFBranch.prototype.delete = function (stone) {
-    
-}
-
 SGFBranch.prototype.back = function() {
     const step = this.step;
     let flag = false;
@@ -159,6 +155,21 @@ SGFBranch.prototype._nextBranch = function (step, i) {
     });
     this.branch = this.branch[i];
     this.step = 0;
+}
+
+SGFBranch.prototype.delete = function (status) {
+    if (status.length > 0) {
+        let branch = this.runtime.root;
+
+        for (let i = 0; i < status.length; i++) {
+            if (branch[status[i]] instanceof Array) {
+                branch = branch[status[i]];
+            } else {
+                
+                break;
+            }
+        } 
+    }
 }
 
 SGFBranch.prototype.recall = function () {

@@ -54,6 +54,10 @@ SGF.prototype.right = function () {
     }
 }
 
+SGF.prototype.save = function () {
+    return this.convertor.to(this);
+}
+
 SGF.prototype.left = function () {
     if (this.runtime.hasFront()) {
         while (!this.branch.back());
@@ -106,6 +110,10 @@ SGF.prototype._click = function (x, y) {
 
 SGF.prototype.putStone = function (x, y) {
     this._click(x, y);
+}
+
+SGF.prototype.delStone = function (status) {
+    this.branch.delete(status);
 }
 
 SGF.prototype.setInputMode = function (mode) {
