@@ -67,7 +67,8 @@ sgf.showOn('chessboard', {
     markColor: 'red',       /* optional, flag mark color */
     lineColor: 'black',     /* optional, board split color */
     styleWidth: 400,        /* optional, board display width */
-    styleHeight: 400        /* optional, board display height */
+    styleHeight: 400,       /* optional, board display height */
+    position: 'relative'    /* optional, workspace div position */ 
 });
 ```
 
