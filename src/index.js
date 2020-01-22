@@ -1,4 +1,4 @@
-const SGFBoard = require('./sgf-board');
+const SGFBoard = require('./board/index');
 const SGFRuntime = require('./sgf-runtime');
 const SGFConvertor = require('./sgf-convertor');
 const SGFBranch = require('./sgf-branch');
