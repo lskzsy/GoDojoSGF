@@ -19,9 +19,10 @@ const SGFBoard = function (hook, option = {}) {
     this.markColor = option.markColor || 'red';
     this.styleWidth = option.styleWidth || 0;
     this.styleHeight = option.styleHeight || 0;
+    this.position = option.position || 'relative';
 
     this.dimension = new SGFBoardDimension(this.width, this.height, this.styleWidth, this.styleHeight);
-    this.workspace = new SGFBoardWorkspace(this.dimension);
+    this.workspace = new SGFBoardWorkspace(this.dimension, this.position);
     this.workspace.register(SGFBoardLayerType.BOARD, BoardLayerFunction, { lineColor: this.lineColor, background: this.background });
     this.workspace.register(SGFBoardLayerType.CHESS, ChessLayerFunction, { branchColor: this.branchColor, background: this.background });
     this.workspace.register(SGFBoardLayerType.PROMPT, PromptLayerFunction);
