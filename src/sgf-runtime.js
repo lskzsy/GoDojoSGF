@@ -79,12 +79,12 @@ SGFRuntime.prototype.putStone = function (chess, isNew=false) {
         }
         this.branch.checkMark();
         if (chess.color == 'w') {
-            this.front && this.front.putWhite(chess.x, chess.y);
+            this.front && this.front.putWhite(chess.x, chess.y, this.currentStep);
             this.board[chess.x][chess.y] = 'w';
             this.select = 'b';
             this.front && this.mode == 'repeat' && this.front.select('b');
         } else {
-            this.front && this.front.putBlack(chess.x, chess.y);
+            this.front && this.front.putBlack(chess.x, chess.y, this.currentStep);
             this.board[chess.x][chess.y] = 'b';
             this.select = 'w';
             this.front && this.mode == 'repeat' && this.front.select('w');

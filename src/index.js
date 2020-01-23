@@ -146,6 +146,14 @@ SGF.prototype.showPrompt = function () {
     this.runtime.hasFront() && this.runtime.front.showPrompt();
 }
 
+SGF.prototype.showStep = function () {
+    this.runtime.hasFront() && this.runtime.front.showStep();
+}
+
+SGF.prototype.hideStep = function () {
+    this.runtime.hasFront() && this.runtime.front.hideStep();
+}
+
 SGF.prototype.onStoneCreated = function (listener) {
     this.runtime.onStoneCreated = listener;
 }

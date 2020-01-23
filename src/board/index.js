@@ -88,12 +88,12 @@ SGFBoard.prototype._clickLoc = function (event) {
     return {x: xPos, y: yPos};
 }
 
-SGFBoard.prototype.putWhite = function (x, y) {
-    this.workspace.handle(SGFBoardLayerType.CHESS, 'putWhite', {x: x, y : y});
+SGFBoard.prototype.putWhite = function (x, y, step) {
+    this.workspace.handle(SGFBoardLayerType.CHESS, 'putWhite', {x: x, y : y, step: step});
 }
 
-SGFBoard.prototype.putBlack = function (x, y) {
-    this.workspace.handle(SGFBoardLayerType.CHESS, 'putBlack', {x: x, y : y});
+SGFBoard.prototype.putBlack = function (x, y, step) {
+    this.workspace.handle(SGFBoardLayerType.CHESS, 'putBlack', {x: x, y : y, step: step});
 }
 
 SGFBoard.prototype.putBranch = function (x, y, branch) {
@@ -160,6 +160,14 @@ SGFBoard.prototype.hidePrompt = function () {
 SGFBoard.prototype.showPrompt = function () {
     this.workspace.handle(SGFBoardLayerType.PROMPT, 'show', true);
     this.runtime.isPrompt = true;
+}
+
+SGFBoard.prototype.showStep = function () {
+    this.workspace.handle(SGFBoardLayerType.CHESS, 'showStepView', true);
+}
+
+SGFBoard.prototype.hideStep = function () {
+    this.workspace.handle(SGFBoardLayerType.CHESS, 'showStepView', false);
 }
 
 SGFBoard.prototype.resize = function (width, height) {

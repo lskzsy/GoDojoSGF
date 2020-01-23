@@ -2,6 +2,8 @@ module.exports = {
     build: function () {
         this.stones = {};
         this.branchMarks = {};
+        this.current = null;
+        this.showStep = false;
     },
     resize: function () {
         const ctx = this.canvas.getContext('2d');
@@ -23,6 +25,19 @@ module.exports = {
         this.call('putStone', params);
     },
     putStone: function (params) {
+        this.call('drawStone', params);
+
+        if (this.current && !params.isHistory) {
+            this.current.isHistory = true;
+            params.last = this.current;
+            this.call('clear', this.current);
+            this.call('drawStone', this.current);
+        }
+        this.current = params;
+
+        this.stones[`${params.x}:${params.y}`] = params;
+    },
+    drawStone: function (params) {
         const ctx       = this.canvas.getContext('2d');
         const dimension = this.workspace.dimension;
         const nodes     = this.workspace.nodes;
@@ -38,7 +53,24 @@ module.exports = {
         ctx.fill();
         ctx.stroke();
 
-        this.stones[`${params.x}:${params.y}`] = params;
+        if (params.isHistory == undefined) {
+            params.isHistory = false;
+        }
+    
+        let show = false;
+        if (!params.isHistory) {
+            ctx.fillStyle = 'red';
+            show = true;
+        } else {
+            ctx.fillStyle = params.isBlack ? '#fff' : '#000';
+            show = this.showStep;
+        }       
+        if (show) {
+            ctx.font = `${parseInt(dimension.padding / 2) - 1}px bold Apercu`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`${params.step}`, loc.x, loc.y, dimension.padding - 2);
+        }
     },
     putBranch: function (params) {
         const ctx       = this.canvas.getContext('2d');
@@ -62,6 +94,20 @@ module.exports = {
         this.branchMarks[`${params.x}:${params.y}`] = params;
     },
     delete: function (params) {
+        this.call('clear', params);
+        const tag = `${params.x}:${params.y}`;
+        if (this.stones[tag]) {
+            if (this.stones[tag].last) {
+                this.current = this.stones[tag].last;
+                this.current.isHistory = false;
+                this.call('clear', this.current);
+                this.call('drawStone', this.current);
+            }
+            delete this.stones[tag];
+        }
+        this.branchMarks[tag] && delete this.branchMarks[tag];
+    },
+    clear: function (params) {
         const ctx       = this.canvas.getContext('2d');
         const dimension = this.workspace.dimension;
         const nodes     = this.workspace.nodes;
@@ -69,9 +115,11 @@ module.exports = {
         const loc = nodes.get(params.x, params.y);
         const r = dimension.padding / 2;
         ctx.clearRect(loc.x - r, loc.y - r, dimension.padding, dimension.padding);
-
-        const tag = `${params.x}:${params.y}`;
-        this.stones[tag] && delete this.stones[tag];
-        this.branchMarks[tag] && delete this.branchMarks[tag];
+    },
+    showStepView: function (flag) {
+        if (flag != this.showStep) {
+            this.showStep = flag;
+            this.call('resize');
+        }
     }
 }

@@ -39,7 +39,7 @@
                 <div class="switch" style="height: 40px;">
                     <label>
                         步数显示
-                        <input type="checkbox">
+                        <input id="stepShow" type="checkbox">
                         <span class="lever"></span>
                     </label>
                 </div>
@@ -248,6 +248,14 @@
                 sgf && sgf.showCoordinate();
             } else {
                 sgf && sgf.hideCoordinate();
+            }
+        });
+
+        $('#stepShow').on('click', (e) => {
+            if (e.currentTarget.checked) {
+                sgf && sgf.showStep();
+            } else {
+                sgf && sgf.hideStep();
             }
         });
 
