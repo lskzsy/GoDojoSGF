@@ -105,6 +105,13 @@ sgf.showPrompt();
 sgf.hidePrompt();
 ```
 
+Show/hide step
+
+```javascript
+sgf.showStep();
+sgf.hideStep();
+```
+
 Control SGF proccess:
 
 ```javascript
