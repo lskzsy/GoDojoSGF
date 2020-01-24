@@ -8,6 +8,7 @@ const PromptLayerFunction       = require('./prompt-function');
 const MarkLayerFuntcion         = require('./mark-function');
 
 const SGFBoardPromptHandle      = require('./prompt-handle');
+const SGFBoardConfirmHandle     = require('./confirm-handle');
 
 
 const SGFBoard = function (hook, option = {}) {
@@ -33,13 +34,15 @@ const SGFBoard = function (hook, option = {}) {
         select: 'b',
         onClickListener: null,
         onRClickListener: null,
-        isPrompt: true
+        isPrompt: true,
+        isConfirm: false
     }
 
     this._bind();
 }
 
 SGFBoard.prototype._bind = function () {
+    this.confirmHandle = new SGFBoardConfirmHandle(this);
     this.workspace.onClick(this._onclick.bind(this));
     this.workspace.onRClick(this._onrclick.bind(this));
     SGFBoardPromptHandle.hook(this);
@@ -160,6 +163,20 @@ SGFBoard.prototype.hidePrompt = function () {
 SGFBoard.prototype.showPrompt = function () {
     this.workspace.handle(SGFBoardLayerType.PROMPT, 'show', true);
     this.runtime.isPrompt = true;
+    this.runtime.isConfirm = false;
+}
+
+SGFBoard.prototype.confirmMode = function (flag) {
+    if (this.runtime.isConfirm != flag) {
+        this.runtime.isConfirm = flag;
+        if (flag) {
+            this.runtime.isPrompt = false;
+            this.workspace.handle(SGFBoardLayerType.PROMPT, 'show', true);
+            this.confirmHandle.mount();
+        } else {
+            this.confirmHandle.dismount();
+        }
+    }
 }
 
 SGFBoard.prototype.showStep = function () {
@@ -176,6 +193,14 @@ SGFBoard.prototype.resize = function (width, height) {
 
 SGFBoard.prototype.select = function (type) {
     this.runtime.select = type;
+}
+
+SGFBoard.prototype.confirm = function () {
+    this.confirmHandle.confirm();
+}
+
+SGFBoard.prototype.quit = function () {
+    this.confirmHandle.quit();
 }
 
 module.exports = SGFBoard;

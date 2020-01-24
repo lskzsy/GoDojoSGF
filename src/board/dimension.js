@@ -34,8 +34,8 @@ SGFBoardDimension.prototype.baseLine = function () {
     this.padding = (total - unit) / (unit - 1 + 2 * this.marginByPadding + (this.showCoord ? 2 : 0));
     this.margin = this.marginByPadding * this.padding;
 
-    this.boardWidth = this.width - 2 * this.margin - (this.showCoord ? 2 * this.padding : 0);
-    this.boardHeight = this.height - 2 * this.margin - (this.showCoord ? 2 * this.padding : 0);
+    this.boardWidth = this.width - 2 * this.margin - (this.showCoord ? 2 * this.padding : 0) - 1;
+    this.boardHeight = this.height - 2 * this.margin - (this.showCoord ? 2 * this.padding : 0) - 1;
 
     this.baseStart = this.showCoord ? this.padding : 0;
     this.baseWidth = this.width - (this.showCoord ? 2 * this.padding : 0);

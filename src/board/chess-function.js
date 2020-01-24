@@ -4,6 +4,7 @@ module.exports = {
         this.branchMarks = {};
         this.current = null;
         this.showStep = false;
+        this.maxStep = 0;
     },
     resize: function () {
         const ctx = this.canvas.getContext('2d');
@@ -27,7 +28,7 @@ module.exports = {
     putStone: function (params) {
         this.call('drawStone', params);
 
-        if (this.current && !params.isHistory) {
+        if (this.current && !params.isHistory && this.call('updateMaxStep', params.step)) {
             this.current.isHistory = true;
             params.last = this.current;
             this.call('clear', this.current);
@@ -66,10 +67,10 @@ module.exports = {
             show = this.showStep;
         }       
         if (show) {
-            ctx.font = `${parseInt(dimension.padding / 2) - 1}px bold Apercu`;
+            ctx.font = `${parseInt(dimension.padding / 2) - 1}px bolder Kaiti`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(`${params.step}`, loc.x, loc.y, dimension.padding - 2);
+            ctx.fillText(`${params.step}`, loc.x, loc.y + 1, dimension.padding - 2);
         }
     },
     putBranch: function (params) {
@@ -97,11 +98,12 @@ module.exports = {
         this.call('clear', params);
         const tag = `${params.x}:${params.y}`;
         if (this.stones[tag]) {
-            if (this.stones[tag].last) {
+            if (this.stones[tag].last && this.call('updateMaxStep', params.step)) {
                 this.current = this.stones[tag].last;
                 this.current.isHistory = false;
                 this.call('clear', this.current);
                 this.call('drawStone', this.current);
+                this.maxStep--;
             }
             delete this.stones[tag];
         }
@@ -120,6 +122,14 @@ module.exports = {
         if (flag != this.showStep) {
             this.showStep = flag;
             this.call('resize');
+        }
+    },
+    updateMaxStep: function (step) {
+        if (this.maxStep < step) {
+            this.maxStep = step;
+            return true;
+        } else {
+            return false;
         }
     }
 }

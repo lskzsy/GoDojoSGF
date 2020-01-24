@@ -1,5 +1,11 @@
 module.exports = {
     build: function () {
+        this.confirmParams = null;
+    },
+    resize: function () {
+        if (this.confirmParams) {
+            this.call('confirmView', this.confirmParams);
+        }
     },
     put: function (params) {
         switch (params.select) {
@@ -85,5 +91,15 @@ module.exports = {
         } else {
             this.canvas.style.display = 'none';
         }
+    },
+    confirmView: function (params) {
+        this.call('clearConfirmView');  
+        this.call('stone', params);
+        this.confirmParams = params;
+    },
+    clearConfirmView: function () {
+        const ctx = this.canvas.getContext('2d');
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.confirmParams = null;
     }
 }

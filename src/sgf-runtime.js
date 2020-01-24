@@ -65,7 +65,7 @@ SGFRuntime.prototype.kill = function (chesses) {
 SGFRuntime.prototype.backLife = function () {
     const dead = this.killBy[this.currentStep];
     if (dead) {
-        dead.forEach(d => {  this.currentStep--; this.putStone(d); });
+        dead.forEach(d => { this.currentStep--; this.putStone(d); });
         this.killBy[this.currentStep] = false;
     }
 }

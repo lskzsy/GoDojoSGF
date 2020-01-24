@@ -165,3 +165,15 @@ SGF.prototype.onStoneDeleted = function (listener) {
 SGF.prototype.onBranchMove = function (listener) {
     this.runtime.onBranchMove = listener;
 }
+
+SGF.prototype.confirmPutStone = function () {
+    this.runtime.hasFront() && this.runtime.front.confirm();
+}
+
+SGF.prototype.quitPutStone = function () {
+    this.runtime.hasFront() && this.runtime.front.quit();
+}
+
+SGF.prototype.confirmMode = function (flag) {
+    this.runtime.hasFront() && this.runtime.front.confirmMode(flag);
+}
