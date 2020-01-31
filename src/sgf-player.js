@@ -67,9 +67,8 @@ SGFPlayer.prototype.back = function (step=1) {
         }
 
         const current = this.branch.get(this.route);
-        if (Util.typeIs(current, SGFStep)) {
-            this.vboard.delete(current.stone);
-        }
+        Util.typeIs(current, SGFStep)
+        && this.vboard.delete(current.stone);
 
         this.step--;
         this.route[this.route.length - 1]--;
@@ -77,7 +76,8 @@ SGFPlayer.prototype.back = function (step=1) {
             this.route.pop();
         }
 
-        this.vboard.backLife(current.stone);
+        Util.typeIs(current, SGFStep)
+        && this.vboard.backLife(current.stone);
     }
 
     return true;
