@@ -53,6 +53,25 @@ SGFBranch.prototype._execute = function (path, runner) {
     }
 }
 
+SGFBranch.prototype.getLastStepIndex = function (path) {
+    return this._execute(path, (current, _) => {
+        for (let i = current.length - 1; i >= 0; i--) {
+            if (Util.typeIs(current[i], SGFStep)) {
+                return i;
+            }
+        } 
+    });
+}
+
+SGFBranch.prototype.getBranch = function (path) {
+    return this._execute(path, (current, _) => {
+        const answer = [];
+        current.forEach(step => 
+            Util.typeIs(step, Array) && answer.push(step[0]));
+        return answer;
+    });
+}
+
 SGFBranch.prototype.insert = function (path, data) {
     if (Util.typeIs(data, SGFStep)) {
         return this._execute(path, (current, index) => {

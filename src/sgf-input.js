@@ -18,6 +18,11 @@ SGFInput.prototype.set = function (mode) {
     }
 }
 
+SGFInput.prototype.setColor = function (color) {
+    this.select = color;
+    this.front.select(this.select);
+}
+
 SGFInput.prototype.repeat = function (color) {
     /** repeat模式，触发交替落子 */
     if (this.mode == 'repeat') {

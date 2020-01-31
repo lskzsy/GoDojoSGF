@@ -115,7 +115,7 @@ SGFRuntime.prototype.putStone = function (chess) {
         } else if (Util.typeIs(exist, Array)) {
             /** 下一步为分支 */
             const branchBegin = next[next.length - 1];
-            const index = this.branch.find(next, branchBegin);
+            const index = this.branch.find(next, step, branchBegin);
             if (index === false) {
                 /** 分支中不存在当前步骤，创建分支 */
                 const branchIndex = this.branch.divide(next, step);
