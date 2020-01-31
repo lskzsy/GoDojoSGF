@@ -91,6 +91,55 @@ SGFRuntime.prototype.updateBySGFString = function (string) {
     this.initBySGFString(string);
 }
 
+SGFRuntime.prototype.recall = function () {
+    if (this.player.step > 0 && !this.branch.get(this.player.next())) {
+        const current = this.branch.get(this.player.getRoute());
+        if (Util.typeIs(current, SGFStep)) {
+            if (current.marks && current.marks.length > 0) {
+                const del = current.marks.splice(current.marks.length - 1);
+                this.hasFront() && this.front.clearMark(del[0].x, del[0].y);
+            } else {
+                const deleted = this.player.getRoute();
+                this.player.back();
+                this.branch.delete(deleted);
+                this.player.clearBranchMark();
+                this.player.showBranchMark();
+
+                this.handlers.onStoneDeleted && 
+                this.handlers.onStoneDeleted(deleted, current);
+            }
+        }
+    }
+}
+
+SGFRuntime.prototype.putMark = function (x, y, type) {
+    const mark = {
+        x: x,
+        y: y,
+        type: type
+    };
+    const current = this.branch.get(this.player.getRoute());
+    if (Util.typeIs(current, SGFStep)) {
+        if (type == 'LB') {
+            let count = 0;
+            if (current.marks != null) {
+                current.marks.forEach(mark => {
+                    mark.type == 'LB' && count++;
+                });
+            }
+            mark.d = String.fromCharCode('A'.charCodeAt() + count);
+        }
+
+        /** 绘制标记 */
+        this.hasFront() 
+        && this.front.putMark(mark);
+        
+        /** 将标记加入当前步骤 */
+        current.addMark(mark);
+    }
+    this.player.hasMark = true;
+}
+
 SGFRuntime.prototype.putStone = function (chess) {
     const step = new SGFStep(chess.x, chess.y, chess.color, this.player.step + 1);
     if (this.board.pass(chess.x, chess.y) && !this.goRule.isAsphyxiating(step.stone)) {
@@ -142,8 +191,8 @@ SGFRuntime.prototype.putStone = function (chess) {
 
         if (created) {
             /** 存在新步骤创建，即通知回调 */
-            // this.handlers.onStoneCreated && 
-            //     this.handlers.onStoneCreated(this.player.route, step);
+            this.handlers.onStoneCreated && 
+                this.handlers.onStoneCreated(this.player.route, step);
         }
         if (changed) {
             /** 存在分支切换，即通知回调 */

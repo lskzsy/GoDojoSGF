@@ -46,13 +46,13 @@ SGF.prototype.resize = function (width, height) {
 }
 
 SGF.prototype._rclick = function () {
-    // this.branch.recall();
+    this.runtime.recall();
 }
 
 SGF.prototype._click = function (x, y) {
     const mode = this.runtime.input.mode;
     if (/^mark(TR|CR|SQ|MA|LB)$/.test(mode)) {
-        this.branch.insertMark(x, y, mode.substr(4));
+        this.runtime.putMark(x, y, mode.substr(4));
     } else {
         if (mode == 'w' || mode == 'b') {
             this.runtime.input.select = mode;
