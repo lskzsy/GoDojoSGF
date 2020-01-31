@@ -1,37 +1,46 @@
-const GoRule = function (runtime) {
-    this.runtime = runtime;
+const GoRule = function (vboard, isKo) {
+    this.vboard = vboard;
+    this.isKo   = isKo;
 
     this.lastKill = null
     this.lastPut = null
+
+    this.deathStones = [];
 }
 
-GoRule.prototype.isAsphyxiating = function (x, y, c) {
-    this.runtime.board[x][y] = c;
-    this._clearDead(x, y, c);
-    const breach = this._searchBreath(x, y);
+GoRule.prototype.isAsphyxiating = function (stone) {
+    this.vboard.data[stone.x][stone.y] = stone;
+    this._clearDead(stone);
+    this.deathStones.forEach(stone => this.vboard.data[stone.x][stone.y] = false);
+    const breach = this._searchBreath(stone);
     if (breach) {
         this.lastPut = {
-            x: x,
-            y: y
+            x: stone.x,
+            y: stone.y
         }
     }
-    this.runtime.board[x][y] = '';
+    this.deathStones.forEach(stone => this.vboard.data[stone.x][stone.y] = stone);
+    this.vboard.data[stone.x][stone.y] = false;
     return !breach;
 }
 
-GoRule.prototype._clearDead = function (x, y, c) {
+GoRule.prototype.getDeathStones = function () {
+    return this.deathStones;
+}
+
+GoRule.prototype._clearDead = function (stone) {
     const xx = [0, 1, 0, -1];
     const yy = [1, 0, -1, 0];
   
+    this.deathStones = [];
     let clear = []
     for (let i = 0; i < 4; i++) {
-        const xt = x + xx[i];
-        const yt = y + yy[i];
+        const xt = stone.x + xx[i];
+        const yt = stone.y + yy[i];
 
-        if (xt >= 0 && xt < this.runtime.width && yt >= 0 && yt < this.runtime.height
-            && this.runtime.boardPass(xt, yt, c)) {
+        if (this.vboard.refuse(xt, yt, stone.color)) {
             const chesses = [];
-            if (!this._searchBreath(xt, yt, chesses)) {
+            if (!this._searchBreath(this.vboard.data[xt][yt], chesses)) {
                 clear = clear.concat(chesses);
             }
         }
@@ -42,26 +51,25 @@ GoRule.prototype._clearDead = function (x, y, c) {
         // console.log(this.lastPut, this.lastKill, clear[0], x, y);
         if (this.lastPut != null && this.lastKill != null && clear.length == 1) {
             isomorph = clear[0].x == this.lastPut.x && clear[0].y == this.lastPut.y
-            && x == this.lastKill.x && y == this.lastKill.y;
+            && stone.x == this.lastKill.x && stone.y == this.lastKill.y;
         }
 
-        if (!(this.runtime.isKo && isomorph)) {
+        if (!(this.isKo && isomorph)) {
             this.lastKill = clear.length == 1 ? clear[0] : null;
-            this.runtime.kill(clear);
+            this.deathStones = clear;
         } 
     }
 }
 
-GoRule.prototype._searchBreath = function (x, y, chesses = []) {
+GoRule.prototype._searchBreath = function (stone, chesses = []) {
     const xx = [0, 1, 0, -1];
     const yy = [1, 0, -1, 0];
     const queue = [];
     const visited = {};
-    const c = this.runtime.board[x][y];
     const breath = false;
-    queue.push({x: x, y: y});
-    visited[`${x}:${y}`] = true;
-    chesses.push({x: x, y: y});
+    queue.push(stone);
+    visited[`${stone.x}:${stone.y}`] = true;
+    chesses.push(stone);
 
     while (queue.length > 0) {
         // bfs
@@ -70,14 +78,14 @@ GoRule.prototype._searchBreath = function (x, y, chesses = []) {
             const xt = cur.x + xx[i];
             const yt = cur.y + yy[i];
 
-            if (!visited[`${xt}:${yt}`] && xt >= 0 && xt < this.runtime.width && yt >= 0 && yt < this.runtime.height) {
+            if (!visited[`${xt}:${yt}`] && this.vboard.in(xt, yt)) {
                 visited[`${xt}:${yt}`] = true;
-                const chess = this.runtime.board[xt][yt];
-                if (chess == c) {
-                    queue.push({x: xt, y: yt});
-                    chesses.push({x: xt, y: yt});
-                } else if (chess == '') {
+                const nstone = this.vboard.data[xt][yt];
+                if (nstone === false) {
                     return true;
+                } else if (nstone.color == stone.color) {
+                    queue.push(nstone);
+                    chesses.push(nstone);
                 }
             }
         }

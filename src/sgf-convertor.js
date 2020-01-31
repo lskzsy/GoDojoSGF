@@ -1,12 +1,16 @@
+const SGFStep = require('./sgf-step');
+
 const SGFConvertor = function () {
     this.symbolMap = null;
+    this.step = 0;
 }
 
 SGFConvertor.prototype.do = function (sgfData) {
     const rawData = sgfData.replace(/\n/g, '');
     const answer = {};
     if (rawData[0] == '(') {
-        this.symbolMap = this._scan(rawData);
+        this.symbolMap  = this._scan(rawData);
+        this.step       = 0;
         if (this.symbolMap) {
             const raws = this._parse(rawData, 0, this.symbolMap[0]);
             answer.root = this._parseRoot(raws[0]);
@@ -20,22 +24,23 @@ SGFConvertor.prototype.do = function (sgfData) {
     }
 }
 
-SGFConvertor.prototype.to = function (sgf) {
-    const data = this._toString(sgf.runtime.root);
-    return `(;CA[${sgf.encoding}]SZ[${sgf.boardSize}]AP[${sgf.application}]${data})`;
+SGFConvertor.prototype.to = function (runtime) {
+    const data = this._toString(runtime.branch.data);
+    return `(;CA[${runtime.properties.encoding}]SZ[${runtime.properties.boardSize}]AP[${runtime.properties.application}]${data})`;
 }
 
 SGFConvertor.prototype._toString = function (raw) {
     const a = 'a'.charCodeAt();
     let data = '';
-    raw.forEach(stone => {
-        if (stone instanceof Array) {
-            data += `(${this._toString(stone)})`;
+    raw.forEach(step => {
+        if (step instanceof Array) {
+            data += `(${this._toString(step)})`;
         } else {
+            const stone = step.stone;
             data += `;${stone.color.toUpperCase()}[${String.fromCharCode(a + stone.x)}${String.fromCharCode(a + stone.y)}]`;
-            if (stone.marks && stone.marks.length > 0) {
+            if (step.marks && step.marks.length > 0) {
                 const markSet = {};
-                stone.marks.forEach(mark => {
+                step.marks.forEach(mark => {
                     if (!markSet[mark.type]) {
                         markSet[mark.type] = [];
                     }
@@ -83,26 +88,28 @@ SGFConvertor.prototype._scan = function (rawData) {
 SGFConvertor.prototype._convert = function (raws) {
     const answer = [];
     const a = 'a'.charCodeAt();
+    let current = 0;
     for (let i = 0; i < raws.length; i++) {
         if (typeof(raws[i]) == 'object') {
             answer.push(this._convert(raws[i]));
         } else {
             const match = /^(W|B)\[(\w)(\w)\](.*?)$/.exec($.trim(raws[i]));
             if (match) {
-                const stone = {
-                    color: match[1].toLocaleLowerCase(),
-                    x: match[2].charCodeAt() - a,
-                    y: match[3].charCodeAt() - a,
-                    marks: null
-                };       
+                this.step++;
+                current++;
+                const step = new SGFStep(
+                    match[2].charCodeAt() - a,
+                    match[3].charCodeAt() - a,
+                    match[1].toLocaleLowerCase(),
+                    this.step
+                );       
                 if (match[4].length > 0) {
-                    stone.marks = [];
                     const ms = match[4].match(/(TR|SQ|MA|CR)(\[\w\w\])+/g);
                     ms.forEach(mark => {
                         const mM = /^(TR|SQ|MA|CR)(.*?)$/.exec(mark);
                         if (mM) {
                             const ms = mM[2].match(/\[\w\w\]/g);
-                            ms.forEach(m => stone.marks.push({
+                            ms.forEach(m => step.addMark({
                                 type: mM[1],
                                 x: m[1].charCodeAt() - a,
                                 y: m[2].charCodeAt() - a,
@@ -112,7 +119,7 @@ SGFConvertor.prototype._convert = function (raws) {
                     const lbM = /LB((\[\w\w:[A-Z]\])+)/.exec(match[4]);
                     if (lbM) {
                         const lbs = lbM[1].match(/\[\w\w:[A-Z]\]/g);
-                        lbs.forEach(lb => stone.marks.push({
+                        lbs.forEach(lb => step.addMark({
                             type: 'LB',
                             x: lb[1].charCodeAt() - a,
                             y: lb[2].charCodeAt() - a,
@@ -120,10 +127,11 @@ SGFConvertor.prototype._convert = function (raws) {
                         }));
                     }
                 }
-                answer.push(stone);
+                answer.push(step);
             }
         }
     }
+    this.step -= current;
     return answer;
 }
 

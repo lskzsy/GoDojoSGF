@@ -1,96 +1,172 @@
-const GoRule = require('./go-rule');
+const GoRule            = require('./go-rule');
+const SGFPlayer         = require('./sgf-player');
+const SGFVirtualBoard   = require('./sgf-virtual-board');
+const SGFBranch         = require('./sgf-branch');
+const SGFStep           = require('./sgf-step');
+const SGFConvertor      = require('./sgf-convertor');
+const SGFInput          = require('./sgf-input');
+const Util              = require('./util');
 
-const SGFRuntime = function (isKo) {
-    this.currentStep = 0;
-    this.board = [];
+const SGFRuntime = function (option={}) {
+    //  current board data
+    this.board = new SGFVirtualBoard();
+
+    //  viewer component
     this.front = null;
-    this.select = 'b';
-    this.isKo = isKo
 
-    this.data = [];
-    this.killBy = {};
-    this.root = [];
+    //  record which player killed the stone(s)
+    this.deathStones = [];
 
-    this.width = 0;
-    this.height = 0;
+    //  board properties
+    this.properties = {
+        x:              option.x || 19,           //  x limit for board coordinate
+        y:              option.y || 19,           //  y limit for board coordinate
+        isKo:           option.isKo || false,
+        encoding:       option.encoding || 'UTF-8',
+        boardSize:      (option.boardSize || '19') + '',
+        application:    option.application || 'GoDojoSGF:20200126',
+        fileFormat:     option.fileFormat || 1,
+        gameMode:       option.gameMode || 1,
+        initData:       option.data || false
+    }
 
-    this.onStoneCreated = null;
-    this.onStoneDeleted = null;
-    this.onBranchMove = null;
-    
-    this.mode = 'repeat';
+    if (this.properties.boardSize.indexOf(':') > -1) {
+        const split = this.properties.boardSize.split(':');
+        this.properties.x = parseInt(split[0]);
+        this.properties.y = parseInt(split[1]);
+    } else {
+        this.properties.x = this.properties.y = parseInt(this.properties.boardSize);
+    }
 
-    this.goRule = new GoRule(this);
+    //  event handlers
+    this.handlers = {
+        onStoneCreated: null,   //  callback when stone created
+        onStoneDeleted: null,   //  callback when stone deleted
+        onBranchMove: null      //  callback when branch was changed
+    }
+
+    this.branch     = new SGFBranch();
+    this.player     = new SGFPlayer(this.properties, this.board, this.branch);
+    this.goRule     = new GoRule(this.board, this.properties.isKo);
+    this.convertor  = new SGFConvertor();
+    this.input      = new SGFInput();
+
+    this.build();
+}
+
+SGFRuntime.prototype.build = function () {
+    this.board.build(this.properties);
+    this.board.setRule(this.goRule);
+    this.board.setInput(this.input);
+
+    /** convert sgf string data, if user input */
+    if (this.properties.initData) {
+        this.initBySGFString(this.properties.initData);
+    }
+}
+
+SGFRuntime.prototype.initBySGFString = function (string) {
+    const info = this.convertor.do(string);
+    if (info) {
+        //  string is valid
+        const root = info.root;
+        root.application && (this.properties.application = root.application);
+        root.boardSize && (this.properties.boardSize = root.boardSize);
+        root.width && (this.properties.x = root.width);
+        root.height && (this.properties.y = root.height);
+        root.encoding && (this.properties.encoding = root.encoding);
+        root.fileFormat && (this.properties.fileFormat = root.fileFormat);
+        root.gameMode && (this.properties.gameMode = root.gameMode);
+
+        this.branch.init(info.data);
+    }
+}
+
+SGFRuntime.prototype.reset = function () {
+}
+
+SGFRuntime.prototype.toString = function () {
+    return this.convertor.to(this);
+}
+
+SGFRuntime.prototype.updateBySGFString = function (string) {
+    this.reset();
+    this.initBySGFString(string);
+}
+
+SGFRuntime.prototype.putStone = function (chess) {
+    const step = new SGFStep(chess.x, chess.y, chess.color, this.player.step + 1);
+    if (this.board.pass(chess.x, chess.y) && !this.goRule.isAsphyxiating(step.stone)) {
+        let created = false;
+
+        /** 判断是否应该加入分支 */
+        const next  = this.player.next();
+        const exist = this.branch.get(next);
+        if (Util.typeIs(exist, SGFStep)) {
+            if (!exist.equal(step)) {
+                /** 如果新步骤不同于存在当前步骤，创建分支 */
+                const branchIndex = this.branch.divide(next, step);
+                if (branchIndex !== false) {
+                    /** 播放器切换至新的分支上 */
+                    this.player.checkout(branchIndex);
+                    created = true;
+                }
+            } else {
+                /** 如果新步骤等于存在当前步骤，播放器向后播放 */
+                this.player.continue();
+            }
+        } else if (Util.typeIs(exist, Array)) {
+            /** 下一步为分支 */
+            const branchBegin = next[next.length - 1];
+            const index = this.branch.find(next, branchBegin);
+            if (index === false) {
+                /** 分支中不存在当前步骤，创建分支 */
+                const branchIndex = this.branch.divide(next, step);
+                if (branchIndex !== false) {
+                    /** 播放器切换至新的分支上 */
+                    this.player.checkout(branchIndex);
+                    created = true;
+                }
+            } else {
+                /** 若分支中已存在当前步骤，则切换到分支上 */
+                this.player.checkout(index);
+            }
+        } else {
+            /** 若分支上不存在该步骤，则直接插入 */
+            this.branch.insert(this.player.getRoute(), step);
+            /** 播放器向后播放 */
+            this.player.continue();
+            created = true        
+        }
+
+        if (created) {
+            /** 存在新步骤创建，即通知回调 */
+            // this.handlers.onStoneCreated && 
+            //     this.handlers.onStoneCreated(this.player.route, step);
+        }
+    }
 }
 
 SGFRuntime.prototype.setFront = function (front) {
     this.front = front;
+    this.board.setFront(front);
+    this.input.setFront(front);
 }
 
 SGFRuntime.prototype.hasFront = function () {
     return this.front != null;
 }
 
-SGFRuntime.prototype.init = function (w, h, data) {
-    this.width = w;
-    this.height = h;
-
-    this.root = data;
-    for (let i = 0; i < w; i++) {
-        const line = [];
-        for (let j = 0; j < h; j++) {
-            line.push('');
-        }
-        this.board.push(line);
-    }
+SGFRuntime.prototype.onStoneCreated = function (callback) {
+    this.handlers.onStoneCreated = callback;
 }
 
-SGFRuntime.prototype.boardPass = function (x, y, c) {
-    return this.board[x][y] != c && this.board[x][y] !== '';
-} 
-
-SGFRuntime.prototype.kill = function (chesses) {
-    this.killBy[this.currentStep + 1] = [];
-    for (let j = 0; j < chesses.length; j++) {
-        this.killBy[this.currentStep + 1].push({
-            x: chesses[j].x,
-            y: chesses[j].y,
-            color: this.board[chesses[j].x][chesses[j].y]
-        });
-        this.board[chesses[j].x][chesses[j].y] = '';
-        this.front && this.front.delete(chesses[j].x, chesses[j].y);
-    }
+SGFRuntime.prototype.onStoneDeleted = function (callback) {
+    this.handlers.onStoneDeleted = callback;
 }
 
-SGFRuntime.prototype.backLife = function () {
-    const dead = this.killBy[this.currentStep];
-    if (dead) {
-        dead.forEach(d => { this.currentStep--; this.putStone(d); });
-        this.killBy[this.currentStep] = false;
-    }
-}
-
-SGFRuntime.prototype.putStone = function (chess, isNew=false) {
-    if (this.board[chess.x][chess.y] === '' 
-            && !this.goRule.isAsphyxiating(chess.x, chess.y, chess.color)) {
-        this.currentStep++;
-        if (isNew) {
-            this.branch.insert(chess.x, chess.y, chess.color);
-        }
-        this.branch.checkMark();
-        if (chess.color == 'w') {
-            this.front && this.front.putWhite(chess.x, chess.y, this.currentStep);
-            this.board[chess.x][chess.y] = 'w';
-            this.select = 'b';
-            this.front && this.mode == 'repeat' && this.front.select('b');
-        } else {
-            this.front && this.front.putBlack(chess.x, chess.y, this.currentStep);
-            this.board[chess.x][chess.y] = 'b';
-            this.select = 'w';
-            this.front && this.mode == 'repeat' && this.front.select('w');
-        }
-        this.data.push(chess);
-    }
+SGFRuntime.prototype.onBranchMove = function (callback) {
+    this.handlers.onBranchMove = callback;
 }
 
 module.exports = SGFRuntime;
