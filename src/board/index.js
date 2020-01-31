@@ -166,7 +166,7 @@ SGFBoard.prototype.showPrompt = function () {
     this.runtime.isConfirm = false;
 }
 
-SGFBoard.prototype.confirmMode = function (flag) {
+SGFBoard.prototype.confirmMode = function (flag, callback) {
     if (this.runtime.isConfirm != flag) {
         this.runtime.isConfirm = flag;
         if (flag) {

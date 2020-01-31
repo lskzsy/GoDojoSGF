@@ -5,8 +5,13 @@ const SGFBoardConfirmHandle = function (board) {
     this.runtime        = board.runtime;
     this.workspace      = board.workspace;
     this.realListener   = board._onclick.bind(board);
+    this.callback       = null;
 
     this.waitConfirmEvent = null;
+}
+
+SGFBoardConfirmHandle.prototype.bindCallback = function (callback) {
+    this.callback = callback;
 }
 
 SGFBoardConfirmHandle.prototype.mount = function () {
@@ -21,6 +26,9 @@ SGFBoardConfirmHandle.prototype.handle = function (event) {
         y: pos.y,
         select: this.runtime.select
     });
+    if (this.callback) {
+        this.callback();
+    }
 }
 
 SGFBoardConfirmHandle.prototype.confirm = function () {

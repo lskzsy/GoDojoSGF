@@ -140,3 +140,10 @@ sgf.onStoneCreated((branchs, stone) => {});
 sgf.onStoneDeleted((branchs) => {}) ;
 sgf.onBranchMove((branchs) => {});
 ```
+
+Open confirm mode(normally used in mobile)
+
+```javascript
+sgf.confirmMode(true);
+
+```

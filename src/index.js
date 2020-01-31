@@ -121,6 +121,6 @@ SGF.prototype.quitPutStone = function () {
     this.runtime.hasFront() && this.runtime.front.quit();
 }
 
-SGF.prototype.confirmMode = function (flag) {
-    this.runtime.hasFront() && this.runtime.front.confirmMode(flag);
+SGF.prototype.confirmMode = function (flag, callback=null) {
+    this.runtime.hasFront() && this.runtime.front.confirmMode(flag, callback);
 }
