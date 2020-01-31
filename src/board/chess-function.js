@@ -45,9 +45,9 @@ module.exports = {
             if (this.stones[tag].last && params.step == this.maxStep) {
                 this.current = this.stones[tag].last;
                 this.current.isHistory = false;
+                this.maxStep--;
                 this.call('clear', this.current);
                 this.call('drawStone', this.current);
-                this.maxStep--;
             }
             delete this.stones[tag];
         }
@@ -74,7 +74,7 @@ module.exports = {
         }
     
         let show = false;
-        if (!params.isHistory) {
+        if (!params.isHistory && params.step >= this.maxStep) {
             ctx.fillStyle = 'red';
             show = true;
         } else {

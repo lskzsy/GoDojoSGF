@@ -8,6 +8,9 @@ const SGFVirtualBoard = function () {
     this.front  = null;
     this.rule   = null;
     this.input  = null;
+
+    //  record which player killed the stone(s)
+    this.deathStones = [];
 }
 
 SGFVirtualBoard.prototype.setFront = function (front) {
@@ -58,6 +61,14 @@ SGFVirtualBoard.prototype.refuse = function (x, y, color) {
     }
 }
 
+SGFVirtualBoard.prototype.backLife = function (stone) {
+    const deaths = this.deathStones[stone.step];
+    if (deaths) {
+        deaths.forEach(stone => this.put(stone));
+        this.deathStones[stone.step] = false;
+    }
+}
+
 SGFVirtualBoard.prototype.put = function (stone) {
     if (Util.typeIs(stone, SGFVirtualStone) && this.pass(stone.x, stone.y)) {
         if (!this.hasRule() || !this.rule.isAsphyxiating(stone)) {
@@ -71,7 +82,10 @@ SGFVirtualBoard.prototype.put = function (stone) {
             }        
             
             const deaths = this.rule.getDeathStones();
-            deaths.forEach(dstone => this.delete(dstone));
+            if (deaths.length > 0) {
+                deaths.forEach(dstone => this.delete(dstone));
+                this.deathStones[stone.step] = deaths;
+            }            
 
             this.hasInput() && this.input.repeat(stone.color);
             return true;

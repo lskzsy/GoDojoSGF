@@ -14,9 +14,6 @@ const SGFRuntime = function (option={}) {
     //  viewer component
     this.front = null;
 
-    //  record which player killed the stone(s)
-    this.deathStones = [];
-
     //  board properties
     this.properties = {
         x:              option.x || 19,           //  x limit for board coordinate

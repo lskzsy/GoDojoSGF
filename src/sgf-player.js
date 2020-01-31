@@ -76,6 +76,8 @@ SGFPlayer.prototype.back = function (step=1) {
         if (this.route[this.route.length - 1] < 0 && this.route.length > 1) {
             this.route.pop();
         }
+
+        this.vboard.backLife(current.stone);
     }
 
     return true;
