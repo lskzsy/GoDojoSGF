@@ -144,6 +144,10 @@ sgf.onBranchMove((branchs) => {});
 Open confirm mode(normally used in mobile)
 
 ```javascript
-sgf.confirmMode(true);
+function stoneWaitConfirm() {
+    sgf.confirmPutStone();  // stone will be created
+    sgf.quitPutStone(); // quit the action
+}
 
+sgf.confirmMode(true, stoneWaitConfirm); // first argument is open/close, second argument is callback if someone click board
 ```
