@@ -196,6 +196,7 @@ SGFBoard.prototype.select = function (type) {
 }
 
 SGFBoard.prototype.confirm = function () {
+    this.workspace.handle(SGFBoardLayerType.PROMPT, 'clearConfirmView');
     this.confirmHandle.confirm();
 }
 
