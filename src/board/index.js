@@ -123,8 +123,8 @@ SGFBoard.prototype.clearMark = function (x=-1, y=-1) {
     });
 }
 
-SGFBoard.prototype.delete = function (x, y) {
-    this.workspace.handle(SGFBoardLayerType.CHESS, 'delete', {x: x, y : y});
+SGFBoard.prototype.delete = function (x, y, step) {
+    this.workspace.handle(SGFBoardLayerType.CHESS, 'delete', {x: x, y : y, step: step});
 }
 
 SGFBoard.prototype.setOnClickListener = function (listener) {

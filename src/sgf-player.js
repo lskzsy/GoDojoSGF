@@ -68,7 +68,7 @@ SGFPlayer.prototype.back = function (step=1) {
 
         const current = this.branch.get(this.route);
         if (Util.typeIs(current, SGFStep)) {
-            this.vboard.delete(current.stone.x, current.stone.y);
+            this.vboard.delete(current.stone);
         }
 
         this.step--;

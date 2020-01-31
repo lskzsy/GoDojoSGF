@@ -38,6 +38,21 @@ module.exports = {
 
         this.stones[`${params.x}:${params.y}`] = params;
     },
+    delete: function (params) {
+        this.call('clear', params);
+        const tag = `${params.x}:${params.y}`;
+        if (this.stones[tag]) {
+            if (this.stones[tag].last && params.step == this.maxStep) {
+                this.current = this.stones[tag].last;
+                this.current.isHistory = false;
+                this.call('clear', this.current);
+                this.call('drawStone', this.current);
+                this.maxStep--;
+            }
+            delete this.stones[tag];
+        }
+        this.branchMarks[tag] && delete this.branchMarks[tag];
+    },
     drawStone: function (params) {
         const ctx       = this.canvas.getContext('2d');
         const dimension = this.workspace.dimension;
@@ -93,21 +108,6 @@ module.exports = {
         ctx.fillText(params.type, loc.x, loc.y, dimension.padding - 2);
 
         this.branchMarks[`${params.x}:${params.y}`] = params;
-    },
-    delete: function (params) {
-        this.call('clear', params);
-        const tag = `${params.x}:${params.y}`;
-        if (this.stones[tag]) {
-            if (this.stones[tag].last && this.call('updateMaxStep', params.step)) {
-                this.current = this.stones[tag].last;
-                this.current.isHistory = false;
-                this.call('clear', this.current);
-                this.call('drawStone', this.current);
-                this.maxStep--;
-            }
-            delete this.stones[tag];
-        }
-        this.branchMarks[tag] && delete this.branchMarks[tag];
     },
     clear: function (params) {
         const ctx       = this.canvas.getContext('2d');

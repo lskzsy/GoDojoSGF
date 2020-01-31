@@ -71,7 +71,7 @@ SGFVirtualBoard.prototype.put = function (stone) {
             }        
             
             const deaths = this.rule.getDeathStones();
-            deaths.forEach(dstone => this.delete(dstone.x, dstone.y));
+            deaths.forEach(dstone => this.delete(dstone));
 
             this.hasInput() && this.input.repeat(stone.color);
             return true;
@@ -83,10 +83,10 @@ SGFVirtualBoard.prototype.put = function (stone) {
     }
 }
 
-SGFVirtualBoard.prototype.delete = function (x, y) {
-    if (this.in(x, y)) {
-        this.data[x][y] = false;
-        this.hasFront() && this.front.delete(x, y);
+SGFVirtualBoard.prototype.delete = function (stone) {
+    if (this.in(stone.x, stone.y)) {
+        this.data[stone.x][stone.y] = false;
+        this.hasFront() && this.front.delete(stone.x, stone.y, stone.step);
         return true;
     } else {
         return false;
