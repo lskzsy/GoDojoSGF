@@ -95,6 +95,7 @@ SGFRuntime.prototype.putStone = function (chess) {
     const step = new SGFStep(chess.x, chess.y, chess.color, this.player.step + 1);
     if (this.board.pass(chess.x, chess.y) && !this.goRule.isAsphyxiating(step.stone)) {
         let created = false;
+        let changed = false;
 
         /** 判断是否应该加入分支 */
         const next  = this.player.next();
@@ -107,6 +108,7 @@ SGFRuntime.prototype.putStone = function (chess) {
                     /** 播放器切换至新的分支上 */
                     this.player.checkout(branchIndex);
                     created = true;
+                    changed = true;
                 }
             } else {
                 /** 如果新步骤等于存在当前步骤，播放器向后播放 */
@@ -123,10 +125,12 @@ SGFRuntime.prototype.putStone = function (chess) {
                     /** 播放器切换至新的分支上 */
                     this.player.checkout(branchIndex);
                     created = true;
+                    changed = true;
                 }
             } else {
                 /** 若分支中已存在当前步骤，则切换到分支上 */
                 this.player.checkout(index);
+                changed = true;
             }
         } else {
             /** 若分支上不存在该步骤，则直接插入 */
@@ -140,6 +144,11 @@ SGFRuntime.prototype.putStone = function (chess) {
             /** 存在新步骤创建，即通知回调 */
             // this.handlers.onStoneCreated && 
             //     this.handlers.onStoneCreated(this.player.route, step);
+        }
+        if (changed) {
+            /** 存在分支切换，即通知回调 */
+            this.handlers.onBranchMove && 
+                this.handlers.onBranchMove();
         }
     }
 }
