@@ -86,10 +86,10 @@ module.exports = {
 
         function drawMaterial(material) {
             ctx.drawImage(material, 
-                loc.x - dimension.padding / 2 - 1, 
-                loc.y - dimension.padding / 2 - 1,
-                dimension.padding + 1,
-                dimension.padding + 1
+                loc.x - dimension.padding / 2, 
+                loc.y - dimension.padding / 2,
+                dimension.padding,
+                dimension.padding
             );
         }
 
