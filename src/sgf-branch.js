@@ -96,7 +96,7 @@ SGFBranch.prototype.delete = function (path) {
                 branch[0].forEach(step => current.push(step));
             }
         } else {
-            if (index == 0) {
+            if (index == 0 && this.data.length > 1) {
                 path = pathCopy.slice(0, pathCopy.length - 1);
                 this.delete(path);
             } else {
