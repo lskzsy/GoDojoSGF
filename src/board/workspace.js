@@ -67,12 +67,12 @@ SGFBoardWorkspace.prototype.coordinate = function (show) {
 }
 
 SGFBoardWorkspace.prototype.updateEdges = function () {
-    this.workspace.style.width = this.dimension.width + 'px';
-    this.workspace.style.height = this.dimension.height + 'px';
+    this.workspace.style.width = this.dimension.styleWidth + 'px';
+    this.workspace.style.height = this.dimension.styleHeight + 'px';
 
     for (let name in this.layerManage) {
         const layer = this.layerManage[name];
-        layer.sizeBy(this.dimension.width, this.dimension.height);
+        layer.sizeBy(this.dimension);
     }
 }
 
@@ -99,7 +99,7 @@ SGFBoardWorkspace.prototype.updateNodes = function () {
 
     answer.get = function (x, y) {
         if (x >= this.length || y >= this[x].length) {
-            return {x: -1, y: -1};
+            return {x: -999, y: -999};
         }
         return this[x][y];
     }

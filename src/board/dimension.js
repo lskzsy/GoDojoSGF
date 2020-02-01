@@ -2,11 +2,14 @@ DEFAULT = {
     MARGIN_BY_PADDING: 0.8
 }
 
-const SGFBoardDimension = function (x, y, width, height) {
+const SGFBoardDimension = function (x, y, styleWidth, styleHeight, width, height) {
     this.x = x;
     this.y = y;
     this.width  = width;
     this.height = height;
+
+    this.styleWidth = styleWidth;
+    this.styleHeight = styleHeight;
 
     this.margin  = 0;
     this.padding = 0;
@@ -43,13 +46,13 @@ SGFBoardDimension.prototype.baseLine = function () {
 }
 
 SGFBoardDimension.prototype.resize = function (width, height, marginByPadding=0) {
-    this.width  = width;
-    this.height = height;
+    this.styleWidth  = width;
+    this.styleHeight = height;
     if (marginByPadding > 0) {
         this.marginByPadding = marginByPadding;
     }
 
-    this.baseLine();
+    // this.baseLine();
 }
 
 SGFBoardDimension.prototype.showCoordinate = function (flag) {

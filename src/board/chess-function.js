@@ -5,6 +5,18 @@ module.exports = {
         this.current = null;
         this.showStep = false;
         this.maxStep = 0;
+
+        this.whiteMaterial = false;
+        this.blackMaterial = false;
+
+        if (this.config.wstoneMaterial) {
+            this.whiteMaterial = new Image();
+            this.whiteMaterial.src = this.config.wstoneMaterial;
+        }
+        if (this.config.bstoneMaterial) {
+            this.blackMaterial = new Image();
+            this.blackMaterial.src = this.config.bstoneMaterial;
+        }
     },
     resize: function () {
         const ctx = this.canvas.getContext('2d');
@@ -60,14 +72,42 @@ module.exports = {
 
         const loc = nodes.get(params.x, params.y);
 
-        ctx.fillStyle = params.isBlack ? '#000' : '#fff';
-        ctx.strokeStyle = this.config.lineColor;
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(loc.x, loc.y, dimension.padding / 2 - 1, 0, 2 * Math.PI);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
+        /** 绘制棋子 */
+        function drawColor() {
+            ctx.fillStyle = params.isBlack ? '#000' : '#fff';
+            ctx.strokeStyle = this.config.lineColor;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(loc.x, loc.y, dimension.padding / 2 - 1, 0, 2 * Math.PI);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        function drawMaterial(material) {
+            ctx.drawImage(material, 
+                loc.x - dimension.padding / 2 - 1, 
+                loc.y - dimension.padding / 2 - 1,
+                dimension.padding + 1,
+                dimension.padding + 1
+            );
+        }
+
+        /** 存在材质，则绘制材质 */
+        if (params.isBlack) {
+            if (this.blackMaterial) {
+                drawMaterial(this.blackMaterial);
+            } else {
+                drawColor.bind(this)();
+            }
+        } else {
+            if (this.whiteMaterial) {
+                drawMaterial(this.whiteMaterial);
+            } else {
+                drawColor.bind(this)();
+            }
+        }
+        
 
         if (params.isHistory == undefined) {
             params.isHistory = false;

@@ -350,8 +350,14 @@
         }
 
         function sgfBeginning() {
+            const size = $(document).height() * 0.9;
             window.sgf.showOn('chessboard', {
-                background: '#FFBA75'
+                background: '#FFBA75',
+                bgMaterial: 'img/material_background_1.jpg',
+                styleWidth: size,
+                styleHeight: size,
+                wstoneMaterial: 'img/white.png',
+                bstoneMaterial: 'img/black.png'
             });
             window.onresize();
             window.sgf.onStoneCreated(onStoneCreated);

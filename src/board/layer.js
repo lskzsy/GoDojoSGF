@@ -21,11 +21,11 @@ SGFBoardLayer.prototype.call = function (functionName, params={}) {
     }
 }
 
-SGFBoardLayer.prototype.sizeBy = function (width, height) {
-    this.canvas.width = width;
-    this.canvas.height = height;
-    this.canvas.style.width = width + 'px';
-    this.canvas.style.height = height + 'px';
+SGFBoardLayer.prototype.sizeBy = function (dimension) {
+    this.canvas.width = dimension.width;
+    this.canvas.height = dimension.height;
+    this.canvas.style.width = dimension.styleWidth + 'px';
+    this.canvas.style.height = dimension.styleHeight + 'px';
 }
 
 module.exports = SGFBoardLayer;

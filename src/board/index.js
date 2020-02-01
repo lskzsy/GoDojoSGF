@@ -10,6 +10,8 @@ const MarkLayerFuntcion         = require('./mark-function');
 const SGFBoardPromptHandle      = require('./prompt-handle');
 const SGFBoardConfirmHandle     = require('./confirm-handle');
 
+const Define                    = require('./define');
+
 
 const SGFBoard = function (hook, option = {}) {
     this.width = option.width || 19;
@@ -21,11 +23,23 @@ const SGFBoard = function (hook, option = {}) {
     this.styleWidth = option.styleWidth || 0;
     this.styleHeight = option.styleHeight || 0;
     this.position = option.position || 'relative';
+    this.bgMaterial = option.bgMaterial || false;
+    this.wstoneMaterial = option.wstoneMaterial || false;
+    this.bstoneMaterial = option.bstoneMaterial || false;
 
-    this.dimension = new SGFBoardDimension(this.width, this.height, this.styleWidth, this.styleHeight);
+    this.dimension = new SGFBoardDimension(this.width, this.height, this.styleWidth, this.styleHeight, Define.REAL_WIDTH, Define.REAL_HEIGHT);
     this.workspace = new SGFBoardWorkspace(this.dimension, this.position);
-    this.workspace.register(SGFBoardLayerType.BOARD, BoardLayerFunction, { lineColor: this.lineColor, background: this.background });
-    this.workspace.register(SGFBoardLayerType.CHESS, ChessLayerFunction, { branchColor: this.branchColor, background: this.background });
+    this.workspace.register(SGFBoardLayerType.BOARD, BoardLayerFunction, { 
+        lineColor: this.lineColor, 
+        background: this.background, 
+        bgMaterial: this.bgMaterial 
+    });
+    this.workspace.register(SGFBoardLayerType.CHESS, ChessLayerFunction, { 
+        branchColor: this.branchColor, 
+        background: this.background, 
+        wstoneMaterial: this.wstoneMaterial, 
+        bstoneMaterial: this.bstoneMaterial 
+    });
     this.workspace.register(SGFBoardLayerType.PROMPT, PromptLayerFunction);
     this.workspace.register(SGFBoardLayerType.MARK, MarkLayerFuntcion, { markColor: this.markColor });
     this.workspace.belongTo(hook);
@@ -65,8 +79,8 @@ SGFBoard.prototype._onclick = function (event) {
 }
 
 SGFBoard.prototype._clickLoc = function (event) {
-    const x = event.offsetX;
-    const y = event.offsetY;
+    const x = event.offsetX * this.dimension.width / this.dimension.styleWidth;
+    const y = event.offsetY * this.dimension.height / this.dimension.styleHeight;
     const s = this.dimension.padding / 2;
     let xPos = 0;
     let yPos = 0;
