@@ -68,7 +68,10 @@ sgf.showOn('chessboard', {
     lineColor: 'black',     /* optional, board split color */
     styleWidth: 400,        /* optional, board display width */
     styleHeight: 400,       /* optional, board display height */
-    position: 'relative'    /* optional, workspace div position */ 
+    position: 'relative',   /* optional, workspace div position */ 
+    bgMaterial: 'img/material_background_1.jpg',    /* optional, default is false */ 
+    wstoneMaterial: 'img/white.png',                /* optional, default is false */ 
+    bstoneMaterial: 'img/black.png'                 /* optional, default is false */ 
 });
 ```
 
