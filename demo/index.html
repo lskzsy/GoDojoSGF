@@ -106,10 +106,11 @@
     <div id="about-modal" class="modal" style="width: 250px;">
         <div class="modal-content">
             <h4>关于</h4>
-            <p>前端版本号: 0.1.0</p>
+            <p>前端版本号: peach 0.8.0</p>
             <p>内核版本号: 1.0.0</p>
-            <p>发行时间: 2019.11.22</p>
-            <p>Copyright © GoDojo Group</p>
+            <p>发行时间: 2020.02.01</p>
+            <p>* 特别鸣谢制作素材的照相 *</p>
+            <p>Copyright © GoDojo.CN Group</p>
         </div>
         <div class="modal-footer">
             <a class="modal-close waves-effect btn-flat">取消</a>
@@ -367,46 +368,17 @@
         function onStoneCreated(steps, step) {
             updateTree();
 
-            // const stone = step.stone;
-            // const tree = $('#tree').jstree();
-            // let id = '0';
-            // for (let i = 0; i < steps.length - 1; i++) {
-            //     id += steps[i];
-            // }
-            // let cur = id;
-            // let nid = id + steps[steps.length - 1];
-            // if (!tree.get_node(id)) {
-            //     cur = id.substring(0, id.lastIndexOf('_'));    
-            //     const br = id.substring(id.lastIndexOf('_') + 1);
-            //     const last = cur + '_' + (br - 1);
-            //     const next = cur + '_' + (parseInt(br) + 1);
-            //     if (tree.get_node(last + 0)) {
-            //         tree.set_id(last + 0, last);
-            //         let j = 1;
-            //         while (tree.get_node(last + j)) {
-            //             tree.move_node(last + j, last, 'last', false);
-            //             j++;
-            //         }
-            //         nid = cur + '_' + br;
-            //     } else if (tree.get_node(last)) {
-            //         nid = cur + '_' + br;
-            //     } else if (tree.get_node(next) || tree.get_node(next + 0)) {
-            //         cur = '0';
-            //         for (let i = 0; steps.length - 2 >= 0 && i < steps.length - 2; i++) {
-            //             cur += steps[i];
-            //         }
-            //     }
-            // }
-            // console.log('TREE_INSERT', id, cur, nid);
-            // tree.create_node(cur, {
-            //     id: nid, 
-            //     type: `${stone.color}stone`, 
-            //     text: `[${translateX(stone.x)}, ${stone.y + 1}]`
-            // }, 'last', false, true);
-            // tree.deselect_all();
-            // tree.select_node(nid);
-            // $('#tree-card').animate({ scrollTop: $(`#${nid}_anchor`).position().top }, 100);
-            // $('#tree-card').animate({ scrollLeft: $(`#${nid}_anchor`).position().left }, 100);
+            let nid = '0_';
+            for (let i = 0; i < steps.length - 1; i++) {
+                nid += `${steps[i]}_`;
+            }
+            nid += steps[steps.length - 1];
+            
+            const tree = $('#tree').jstree();
+            tree.deselect_all();
+            tree.select_node(nid);
+            $('#tree-card').animate({ scrollTop: $(`#${nid}_anchor`).position().top }, 100);
+            $('#tree-card').animate({ scrollLeft: $(`#${nid}_anchor`).position().left }, 100);
         }
 
         function onStoneDeleted(steps) {
@@ -443,8 +415,6 @@
                         type: `${stone.color}stone`,
                         text: `[${translateX(stone.x)}, ${stone.y + 1}]`
                     }, 'last', false, true);
-                    tree.deselect_all();
-                    tree.select_node(id);
                 }
             }
             if (branchBegin !== false) {
@@ -461,8 +431,6 @@
                             type: `${beginStone.color}stone`,
                             text: `[${translateX(beginStone.x)}, ${beginStone.y + 1}]`
                         }, 'last', false, true);
-                        tree.deselect_all();
-                        tree.select_node(beginId);
                         prev.push(i);
                         const br = branch[i].slice();
                         br[0] = false;
