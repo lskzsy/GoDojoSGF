@@ -364,98 +364,115 @@
             window.sgf.onStoneDeleted(onStoneDeleted);
         }
 
-        function onStoneCreated(steps, stone) {
-            const tree = $('#tree').jstree();
-            let id = '0';
-            for (let i = 0; i < steps.length - 1; i++) {
-                id += steps[i];
-            }
-            let cur = id;
-            let nid = id + steps[steps.length - 1];
-            if (!tree.get_node(id)) {
-                cur = id.substring(0, id.lastIndexOf('_'));    
-                const br = id.substring(id.lastIndexOf('_') + 1);
-                const last = cur + '_' + (br - 1);
-                const next = cur + '_' + (parseInt(br) + 1);
-                if (tree.get_node(last + 0)) {
-                    tree.set_id(last + 0, last);
-                    let j = 1;
-                    while (tree.get_node(last + j)) {
-                        tree.move_node(last + j, last, 'last', false);
-                        j++;
-                    }
-                    nid = cur + '_' + br;
-                } else if (tree.get_node(last)) {
-                    nid = cur + '_' + br;
-                } else if (tree.get_node(next) || tree.get_node(next + 0)) {
-                    cur = '0';
-                    for (let i = 0; steps.length - 2 >= 0 && i < steps.length - 2; i++) {
-                        cur += steps[i];
-                    }
-                }
-            }
-            console.log('TREE_INSERT', id, cur, nid);
-            tree.create_node(cur, {
-                id: nid, 
-                type: `${stone.color}stone`, 
-                text: `[${translateX(stone.x)}, ${stone.y + 1}]`
-            }, 'last', false, true);
-            tree.deselect_all();
-            tree.select_node(nid);
-            $('#tree-card').animate({ scrollTop: $(`#${nid}_anchor`).position().top }, 100);
-            $('#tree-card').animate({ scrollLeft: $(`#${nid}_anchor`).position().left }, 100);
+        function onStoneCreated(steps, step) {
+            updateTree();
+
+            // const stone = step.stone;
+            // const tree = $('#tree').jstree();
+            // let id = '0';
+            // for (let i = 0; i < steps.length - 1; i++) {
+            //     id += steps[i];
+            // }
+            // let cur = id;
+            // let nid = id + steps[steps.length - 1];
+            // if (!tree.get_node(id)) {
+            //     cur = id.substring(0, id.lastIndexOf('_'));    
+            //     const br = id.substring(id.lastIndexOf('_') + 1);
+            //     const last = cur + '_' + (br - 1);
+            //     const next = cur + '_' + (parseInt(br) + 1);
+            //     if (tree.get_node(last + 0)) {
+            //         tree.set_id(last + 0, last);
+            //         let j = 1;
+            //         while (tree.get_node(last + j)) {
+            //             tree.move_node(last + j, last, 'last', false);
+            //             j++;
+            //         }
+            //         nid = cur + '_' + br;
+            //     } else if (tree.get_node(last)) {
+            //         nid = cur + '_' + br;
+            //     } else if (tree.get_node(next) || tree.get_node(next + 0)) {
+            //         cur = '0';
+            //         for (let i = 0; steps.length - 2 >= 0 && i < steps.length - 2; i++) {
+            //             cur += steps[i];
+            //         }
+            //     }
+            // }
+            // console.log('TREE_INSERT', id, cur, nid);
+            // tree.create_node(cur, {
+            //     id: nid, 
+            //     type: `${stone.color}stone`, 
+            //     text: `[${translateX(stone.x)}, ${stone.y + 1}]`
+            // }, 'last', false, true);
+            // tree.deselect_all();
+            // tree.select_node(nid);
+            // $('#tree-card').animate({ scrollTop: $(`#${nid}_anchor`).position().top }, 100);
+            // $('#tree-card').animate({ scrollLeft: $(`#${nid}_anchor`).position().left }, 100);
         }
 
         function onStoneDeleted(steps) {
-            const tree = $('#tree').jstree();
-            let id = '0';
-            let next = '0';
-            for (let i = 0; i < steps.length; i++) {
-                id += steps[i];
-            }
-            console.log('TREE_DELETE', id);
-            if (tree.get_node(id)) {
-                tree.delete_node(id);
-            } else if (id[id.length - 1] == '0' && tree.get_node(id.substr(0, id.length - 1))) {
-                tree.delete_node(id.substr(0, id.length - 1));
-            }
+            updateTree();
         }
 
         function updateTree() {
             if (sgf) {
                 clearTree();
-                const status = sgf.runtime.root;
-                const runtime = {
-                    step: 0,
-                    history: [],
-                    branch: status
-                };
-                doUpdateTree(runtime);
+                const branch = sgf.runtime.branch.data;
+                doUpdateTree('0', branch, ['0']);
             }
         }
 
-        function doUpdateTree(runtime) {
+        function doUpdateTree(node, branch, prev) {
             const tree = $('#tree').jstree();
-            for (let i = 0; i < runtime.branch.length; i++) {
-                const stone = runtime.branch[i];
-                if (stone instanceof Array) {
-                    runtime.history.push({
-                        branch: runtime.branch,
-                        step: runtime.step - 1,
-                        select: i
-                    });
-                    runtime.branch = runtime.branch[i];
-                    runtime.step = 0;
-                    doUpdateTree(runtime);
-                    const history = runtime.history.pop();
-                    runtime.branch = history.branch;
-                    runtime.step = i;
+            let branchBegin = false;
+            let lastId = false;
+            let prevId = '';
+            prev.forEach(p => prevId += `${p}_`);
+
+            for (let i = 0; i < branch.length; i++) {
+                if (branch[i] instanceof Array) {
+                    branchBegin = i;
+                    lastId = `${prevId}${i - 1}`;
+                    break;
+                } else if (branch[i] === false) {
+                    continue;
                 } else {
-                    const steps = [];
-                    runtime.history.forEach(h => {steps.push(`${h.step}_${h.select}`)});
-                    steps.push(runtime.step < 0 ? 0 : runtime.step);
-                    onStoneCreated(steps, stone);
-                    runtime.step++;
+                    const stone = branch[i].stone;
+                    const id = `${prevId}${i}`;
+                    tree.create_node(node, {
+                        id: id,
+                        type: `${stone.color}stone`,
+                        text: `[${translateX(stone.x)}, ${stone.y + 1}]`
+                    }, 'last', false, true);
+                    tree.deselect_all();
+                    tree.select_node(id);
+                }
+            }
+            if (branchBegin !== false) {
+                prev.push(branchBegin);
+                doUpdateTree(node, branch[branchBegin], prev);
+                prev.pop();
+
+                if (branch.length - branchBegin > 2) {
+                    for (let i = branchBegin + 1; i < branch.length; i++) {
+                        const beginId = `${prevId}${i}_0`;
+                        const beginStone = branch[i][0].stone;
+                        tree.create_node(lastId, {
+                            id: beginId,
+                            type: `${beginStone.color}stone`,
+                            text: `[${translateX(beginStone.x)}, ${beginStone.y + 1}]`
+                        }, 'last', false, true);
+                        tree.deselect_all();
+                        tree.select_node(beginId);
+                        prev.push(i);
+                        const br = branch[i].slice();
+                        br[0] = false;
+                        doUpdateTree(beginId, br, prev);
+                        prev.pop();
+                    }
+                } else {
+                    prev.push(branchBegin + 1);
+                    doUpdateTree(lastId, branch[branchBegin + 1], prev);
+                    prev.pop();
                 }
             }
         }
