@@ -10,6 +10,12 @@ module.exports = {
             this.call('put', this.marks[tag]);
         }
     },
+    reset: function () {
+        this.marks = {};
+
+        const ctx = this.canvas.getContext('2d');
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    },
     put: function (params) {
         const markCtx   = this.canvas.getContext('2d');
         const dimension = this.workspace.dimension;

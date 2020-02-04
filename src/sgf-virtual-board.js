@@ -111,4 +111,18 @@ SGFVirtualBoard.prototype.in = function (x, y) {
     return x >= 0 && x < this.x && y >= 0 && y < this.y;
 }
 
+SGFVirtualBoard.prototype.reset = function () {
+    this.data = [];
+    this.deathStones = [];
+    for (let i = 0; i < this.x; i++) {
+        const line = [];
+        for (let j = 0; j < this.y; j++) {
+            line.push(false);
+        }
+        this.data.push(line);
+    }
+
+    this.hasFront() && this.front.reset();
+}
+
 module.exports = SGFVirtualBoard;

@@ -61,6 +61,29 @@ SGFPlayer.prototype.getRoute = function () {
     return this.route.slice();
 }
 
+SGFPlayer.prototype.reset = function () {
+    this.step       = 0;
+    this.route      = [-1];
+
+    this.branchMark = [];
+    this.hasMark = false;
+}
+
+SGFPlayer.prototype.jump = function (path) {
+    if (Util.typeIs(path, Array)) {
+        this.reset();
+        this.vboard.reset();
+    
+        for (let i = 0; i < path.length - 1; i++) {
+            while (this.continue());
+            this.checkout(path[i]);
+        }
+        return this.continue(path[path.length - 1] + 1);
+    } else {
+        return false;
+    }
+}
+
 SGFPlayer.prototype.continue = function (step=1) {
     for (let i = 0; i < step; i++) {
         this.step++;

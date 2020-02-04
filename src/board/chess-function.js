@@ -153,6 +153,16 @@ module.exports = {
 
         this.branchMarks[`${params.x}:${params.y}`] = params;
     },
+    reset: function () {
+        this.stones = {};
+        this.branchMarks = {};
+        this.current = null;
+        this.showStep = false;
+        this.maxStep = 0;
+
+        const ctx = this.canvas.getContext('2d');
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    },
     clear: function (params) {
         const ctx       = this.canvas.getContext('2d');
         const dimension = this.workspace.dimension;

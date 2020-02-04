@@ -65,6 +65,10 @@ SGF.prototype._click = function (x, y) {
     }  
 }
 
+SGF.prototype.jump = function (path) {
+    return this.runtime.player.jump(path);
+}
+
 SGF.prototype.putStone = function (x, y) {
     this._click(x, y);
 }

@@ -105,6 +105,10 @@ SGFBoard.prototype._clickLoc = function (event) {
     return {x: xPos, y: yPos};
 }
 
+SGFBoard.prototype.reset = function () {
+    this.workspace.broadcast('reset');
+}
+
 SGFBoard.prototype.putWhite = function (x, y, step) {
     this.workspace.handle(SGFBoardLayerType.CHESS, 'putWhite', {x: x, y : y, step: step});
 }
