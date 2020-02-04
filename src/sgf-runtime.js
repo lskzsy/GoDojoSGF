@@ -80,6 +80,9 @@ SGFRuntime.prototype.initBySGFString = function (string) {
 }
 
 SGFRuntime.prototype.reset = function () {
+    this.board.reset();
+    this.player.reset();
+    this.branch.reset();
 }
 
 SGFRuntime.prototype.toString = function () {
@@ -200,6 +203,17 @@ SGFRuntime.prototype.putStone = function (chess) {
                 this.handlers.onBranchMove();
         }
     }
+}
+
+SGFRuntime.prototype.delStone = function (route) {
+    const source = route;
+    route = route.slice();
+    route[route.length - 1]--;
+    if (route[route.length - 1] < 0) {
+        route.pop();
+    }
+    this.player.jump(route);
+    this.branch.delete(source);
 }
 
 SGFRuntime.prototype.setFront = function (front) {

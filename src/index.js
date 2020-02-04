@@ -73,8 +73,8 @@ SGF.prototype.putStone = function (x, y) {
     this._click(x, y);
 }
 
-SGF.prototype.delStone = function (status) {
-    // this.branch.delete(status);
+SGF.prototype.delStone = function (route) {
+    this.runtime.delStone(route);
 }
 
 SGF.prototype.setInputMode = function (mode) {
