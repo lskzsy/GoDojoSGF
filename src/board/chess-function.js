@@ -54,12 +54,16 @@ module.exports = {
         this.call('clear', params);
         const tag = `${params.x}:${params.y}`;
         if (this.stones[tag]) {
-            if (this.stones[tag].last && params.step == this.maxStep) {
-                this.current = this.stones[tag].last;
-                this.current.isHistory = false;
-                this.maxStep--;
-                this.call('clear', this.current);
-                this.call('drawStone', this.current);
+            if (this.stones[tag].last) {
+                if (params.step == this.maxStep) {
+                    this.current = this.stones[tag].last;
+                    this.current.isHistory = false;
+                    this.maxStep--;
+                    this.call('clear', this.current);
+                    this.call('drawStone', this.current);
+                }
+            } else {
+                this.current = false;
             }
             delete this.stones[tag];
         }
@@ -86,10 +90,10 @@ module.exports = {
 
         function drawMaterial(material) {
             ctx.drawImage(material, 
-                loc.x - dimension.padding / 2, 
-                loc.y - dimension.padding / 2,
-                dimension.padding,
-                dimension.padding
+                loc.x - dimension.padding / 2 + 1, 
+                loc.y - dimension.padding / 2 + 1,
+                dimension.padding - 2,
+                dimension.padding - 2
             );
         }
 
