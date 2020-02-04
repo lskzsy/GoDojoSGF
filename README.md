@@ -161,3 +161,10 @@ Jump to any step:
 const path = [2, 1]; // Jump to second step in branch 2 
 sgf.jump(path);
 ```
+
+Delete any step:
+
+```javascript
+const path = [2, 1]; // Delete second step in branch 2 and next...
+sgf.delStone(path);
+```
