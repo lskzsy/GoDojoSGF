@@ -30,6 +30,7 @@ SGFBranch.prototype.get = function (path) {
 }
 
 SGFBranch.prototype._execute = function (path, runner) {
+    path = path.slice();
     if (Util.typeIs(path, Array) && path.length > 0) {
         const route = path.splice(0, path.length - 1);
         let current = this.data;
