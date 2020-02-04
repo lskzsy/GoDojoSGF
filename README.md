@@ -154,3 +154,10 @@ function stoneWaitConfirm() {
 
 sgf.confirmMode(true, stoneWaitConfirm); // first argument is open/close, second argument is callback if someone click board
 ```
+
+Jump to any step:
+
+```javascript
+const path = [2, 1]; // Jump to second step in branch 2 
+sgf.jump(path);
+```
