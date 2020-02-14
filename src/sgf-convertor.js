@@ -105,7 +105,7 @@ SGFConvertor.prototype._convert = function (raws) {
                 );       
                 if (match[4].length > 0) {
                     const ms = match[4].match(/(TR|SQ|MA|CR)(\[\w\w\])+/g);
-                    ms.forEach(mark => {
+                    ms && ms.forEach(mark => {
                         const mM = /^(TR|SQ|MA|CR)(.*?)$/.exec(mark);
                         if (mM) {
                             const ms = mM[2].match(/\[\w\w\]/g);
