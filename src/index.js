@@ -78,7 +78,7 @@ SGF.prototype.addComment = function (text) {
 }
 
 SGF.prototype.getComment = function () {
-    this.runtime.getComment();
+    return this.runtime.getComment();
 }
 
 SGF.prototype.delStone = function (route) {
