@@ -1,9 +1,10 @@
 const SGFVirtualStone = require('./sgf-virtual-stone');
 const Util            = require('./util');
 
-const SGFStep = function (x, y, color, step, marks=null) {
+const SGFStep = function (x, y, color, step, marks=null, comment=null) {
     this.stone = new SGFVirtualStone(x, y, color, step);
     this.marks = marks;
+    this.comment = comment;
 }
 
 SGFStep.prototype.addMark = function (mark) {
@@ -12,6 +13,10 @@ SGFStep.prototype.addMark = function (mark) {
     }
 
     this.marks.push(mark);
+}
+
+SGFStep.prototype.addComment = function (text) {
+    this.comment = text;
 }
 
 SGFStep.prototype.equal = function (other) {

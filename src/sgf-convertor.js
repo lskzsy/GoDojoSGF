@@ -6,7 +6,7 @@ const SGFConvertor = function () {
 }
 
 SGFConvertor.prototype.do = function (sgfData) {
-    const rawData = sgfData.replace(/\n/g, '');
+    const rawData = sgfData;
     const answer = {};
     if (rawData[0] == '(') {
         this.symbolMap  = this._scan(rawData);
@@ -58,6 +58,9 @@ SGFConvertor.prototype._toString = function (raw) {
                     });
                 }
             }  
+            if (step.comment) {
+                data += `C[${step.comment}]`;
+            }
         }
     });
     return data;
@@ -67,13 +70,26 @@ SGFConvertor.prototype._scan = function (rawData) {
     const symbolMap = {};
     const stack = [];
     let deep = 0;
+    let isContent = false;
     for (let i = 0; i < rawData.length; i++) {
         switch (rawData[i]) {
+            case '[':
+                isContent = true;
+                break;
+            case ']':
+                if (i - 1 >= 0 && rawData[i - 1] != '\\') {
+                    isContent = false;   
+                }
+                break;
             case '(':
-                stack[deep++] = i;
+                if (!isContent) {
+                    stack[deep++] = i;
+                }
                 break;
             case ')':
-                symbolMap[stack[--deep]] = i;
+                if (!isContent) {
+                    symbolMap[stack[--deep]] = i;
+                }
                 break;
         }
     }
@@ -93,7 +109,7 @@ SGFConvertor.prototype._convert = function (raws) {
         if (typeof(raws[i]) == 'object') {
             answer.push(this._convert(raws[i]));
         } else {
-            const match = /^(W|B)\[(\w)(\w)\](.*?)$/.exec($.trim(raws[i]));
+            const match = /^(W|B)\[(\w)(\w)\](.*?)$/s.exec($.trim(raws[i]));
             if (match) {
                 this.step++;
                 current++;
@@ -102,18 +118,23 @@ SGFConvertor.prototype._convert = function (raws) {
                     match[3].charCodeAt() - a,
                     match[1].toLocaleLowerCase(),
                     this.step
-                );       
+                );
                 if (match[4].length > 0) {
-                    const ms = match[4].match(/(TR|SQ|MA|CR)(\[\w\w\])+/g);
+                    window.TEST = match[4];
+                    const ms = match[4].match(/(TR|SQ|MA|CR|C)(\[(.*?)[^\\]\])+/sg);
                     ms && ms.forEach(mark => {
-                        const mM = /^(TR|SQ|MA|CR)(.*?)$/.exec(mark);
+                        const mM = /^(TR|SQ|MA|CR|C)(.*?)$/s.exec(mark);
                         if (mM) {
-                            const ms = mM[2].match(/\[\w\w\]/g);
-                            ms.forEach(m => step.addMark({
-                                type: mM[1],
-                                x: m[1].charCodeAt() - a,
-                                y: m[2].charCodeAt() - a,
-                            }));
+                            if (mM[1] == 'C') {
+                                step.addComment(mM[2].substr(1, mM[2].length - 2));
+                            } else {
+                                const ms = mM[2].match(/\[\w\w\]/g);
+                                ms.forEach(m => step.addMark({
+                                    type: mM[1],
+                                    x: m[1].charCodeAt() - a,
+                                    y: m[2].charCodeAt() - a,
+                                }));
+                            }
                         }
                     });
                     const lbM = /LB((\[\w\w:[A-Z]\])+)/.exec(match[4]);
@@ -138,10 +159,18 @@ SGFConvertor.prototype._convert = function (raws) {
 SGFConvertor.prototype._parse = function (rawData, start, end) { 
     const answer = [];
     let i = start + 1;
-    let branch = rawData.indexOf('(', i);
-    if (branch > end || branch == -1) {
-        branch = end;
-    }
+    let k = i;
+    let branch = -1;
+    window.TEST = rawData;
+    do {
+        branch = rawData.indexOf('(', k);
+        if (branch > end || branch == -1) {
+            branch = end;
+            break;
+        }
+        k = branch + 1;
+    } while (!this.symbolMap[branch]);
+
     const steps = rawData.substring(i, branch).split(';');
     steps.forEach(step => {
         if (step.length > 0) {
@@ -155,8 +184,10 @@ SGFConvertor.prototype._parse = function (rawData, start, end) {
     i = branch;
     while (i < end && i != -1) {
         let j = this.symbolMap[i];
-        answer.push(this._parse(rawData, i, j));
-        i = rawData.indexOf('(', j);
+        if (j) {
+            answer.push(this._parse(rawData, i, j));
+            i = rawData.indexOf('(', j);
+        }
     }
     return answer;
 }

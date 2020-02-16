@@ -73,6 +73,14 @@ SGF.prototype.putStone = function (x, y) {
     this._click(x, y);
 }
 
+SGF.prototype.addComment = function (text) {
+    this.runtime.addComment(text);
+}
+
+SGF.prototype.getComment = function () {
+    this.runtime.getComment();
+}
+
 SGF.prototype.delStone = function (route) {
     this.runtime.delStone(route);
 }

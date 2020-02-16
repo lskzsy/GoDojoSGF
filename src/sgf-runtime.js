@@ -143,6 +143,23 @@ SGFRuntime.prototype.putMark = function (x, y, type) {
     this.player.hasMark = true;
 }
 
+SGFRuntime.prototype.addComment = function (text) {
+    const current = this.branch.get(this.player.getRoute());
+    if (Util.typeIs(current, SGFStep)) {
+        /** 为当前步骤添加评论 */
+        current.addComment(text);
+    }
+}
+
+SGFRuntime.prototype.getComment = function () {
+    const current = this.branch.get(this.player.getRoute());
+    if (Util.typeIs(current, SGFStep)) {
+        return current.comment ? current.comment : '';
+    } else {
+        return '';
+    }
+}
+
 SGFRuntime.prototype.putStone = function (chess) {
     const step = new SGFStep(chess.x, chess.y, chess.color, this.player.step + 1);
     if (this.board.pass(chess.x, chess.y) && !this.goRule.isAsphyxiating(step.stone)) {
