@@ -168,3 +168,10 @@ Delete any step:
 const path = [2, 1]; // Delete second step in branch 2 and next...
 sgf.delStone(path);
 ```
+
+Comment step:
+
+```javascript
+sgf.addComment('text');
+const text = sgf.getComment();
+```
