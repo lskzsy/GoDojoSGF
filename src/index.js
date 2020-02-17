@@ -125,6 +125,14 @@ SGF.prototype.onBranchMove = function (listener) {
     this.runtime.onBranchMove(listener);
 }
 
+SGF.prototype.onSGFChanged = function (listener) {
+    this.runtime.onSGFChanged(listener);
+}
+
+SGF.prototype.onPlayerChanged = function (listener) {
+    this.runtime.onPlayerChanged(listener);
+}
+
 SGF.prototype.confirmPutStone = function () {
     this.runtime.hasFront() && this.runtime.front.confirm();
 }

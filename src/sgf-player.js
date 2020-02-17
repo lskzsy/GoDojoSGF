@@ -11,6 +11,8 @@ const SGFPlayer = function (properties, vboard, branch) {
 
     this.branchMark = [];
     this.hasMark = false;
+
+    this.changed = false;
 }
 
 SGFPlayer.prototype.showBranchMark = function () {
@@ -25,6 +27,10 @@ SGFPlayer.prototype.showBranchMark = function () {
             y: branch.stone.y
         });
     });
+}
+
+SGFPlayer.prototype.onChanged = function (listener) {
+    this.changed = listener;
 }
 
 SGFPlayer.prototype.clearBranchMark = function () {
@@ -105,6 +111,9 @@ SGFPlayer.prototype.continue = function (step=1) {
             this.route[this.route.length - 1]--;
             return false;
         }
+        
+        //  回调
+        this.changed && this.changed(this.route);
     }
     return true;
 }
@@ -135,6 +144,9 @@ SGFPlayer.prototype.back = function (step=1) {
 
         Util.typeIs(current, SGFStep)
         && this.vboard.backLife(current.stone);
+
+        //  回调
+        this.changed && this.changed(this.route);
     }
 
     return true;

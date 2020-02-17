@@ -39,7 +39,9 @@ const SGFRuntime = function (option={}) {
     this.handlers = {
         onStoneCreated: null,   //  callback when stone created
         onStoneDeleted: null,   //  callback when stone deleted
-        onBranchMove: null      //  callback when branch was changed
+        onBranchMove: null,     //  callback when branch was changed
+        onPlayerChanged: null,  //  callback when player process was changed
+        onSGFChanged: null      //  callback when game status was changed
     }
 
     this.branch     = new SGFBranch();
@@ -111,6 +113,8 @@ SGFRuntime.prototype.recall = function () {
                 this.handlers.onStoneDeleted && 
                 this.handlers.onStoneDeleted(deleted, current);
             }
+            this.handlers.onSGFChanged &&
+                this.handlers.onSGFChanged(this.player.route, current);
         }
     }
 }
@@ -139,6 +143,10 @@ SGFRuntime.prototype.putMark = function (x, y, type) {
         
         /** 将标记加入当前步骤 */
         current.addMark(mark);
+
+        /** 回调 */
+        this.handlers.onSGFChanged &&
+            this.handlers.onSGFChanged(this.player.route, current);
     }
     this.player.hasMark = true;
 }
@@ -213,6 +221,8 @@ SGFRuntime.prototype.putStone = function (chess) {
             /** 存在新步骤创建，即通知回调 */
             this.handlers.onStoneCreated && 
                 this.handlers.onStoneCreated(this.player.route, step);
+            this.handlers.onSGFChanged &&
+                this.handlers.onSGFChanged(this.player.route, step);
         }
         if (changed) {
             /** 存在分支切换，即通知回调 */
@@ -231,6 +241,10 @@ SGFRuntime.prototype.delStone = function (route) {
     }
     this.player.jump(route);
     this.branch.delete(source);
+
+    // 回调
+    this.handlers.onSGFChanged &&
+        this.handlers.onSGFChanged(this.player.route, this.branch.get(this.player.route));
 }
 
 SGFRuntime.prototype.setFront = function (front) {
@@ -253,6 +267,15 @@ SGFRuntime.prototype.onStoneDeleted = function (callback) {
 
 SGFRuntime.prototype.onBranchMove = function (callback) {
     this.handlers.onBranchMove = callback;
+}
+
+SGFRuntime.prototype.onPlayerChanged = function (callback) {
+    this.handlers.onPlayerChanged = callback;
+    this.player.onChanged(callback);
+}
+
+SGFRuntime.prototype.onSGFChanged = function (callback) {
+    this.handlers.onSGFChanged = callback;
 }
 
 module.exports = SGFRuntime;
