@@ -139,9 +139,11 @@ sgf.save(); // return sgf format string
 Listen SGF state:
 
 ```javascript
-sgf.onStoneCreated((branchs, stone) => {});
-sgf.onStoneDeleted((branchs) => {}) ;
-sgf.onBranchMove((branchs) => {});
+sgf.onStoneCreated((route, stone) => {});
+sgf.onStoneDeleted((route) => {}) ;
+sgf.onBranchMove((route) => {});
+sgf.onSGFChanged((route, stone) => {});
+sgf.onPlayerChanged((route) => {});
 ```
 
 Open confirm mode(normally used in mobile)
