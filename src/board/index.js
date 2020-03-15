@@ -191,6 +191,7 @@ SGFBoard.prototype.confirmMode = function (flag, callback) {
             this.runtime.isPrompt = false;
             this.workspace.handle(SGFBoardLayerType.PROMPT, 'show', true);
             this.confirmHandle.mount();
+            this.confirmHandle.bindCallback(callback);
         } else {
             this.confirmHandle.dismount();
         }
