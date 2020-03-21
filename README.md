@@ -2,11 +2,14 @@
 ---
 **GoDojoSGF** is an online SGF editor developed by GoDojo.CN. It's based on web technology stack, providing an elegant and convenient way to edit SGF file across all the platforms (Windows, MacOS, Linux, Android, iOS). The Editor allows user to create, edit, or open existing SGF files in any modern web browsers. You can add the editor into your web service by simply referencing the Javascript APIs and tweaking the parameters.
 
+**HeyGo** is a web application, which is based on GoDojoSGF. GoDojoSGF implement logic for feature. HeyGo is release version, provided complete UI for GoDojoSGF. The project can visit: [HeyGo]
+
 [![license][license-image]][license-url]
 [![node version][node-image]][node-url]
 [![jquery version][jquery-image]][jquery-url]
 [![release][release-image]][release-url]
 
+[HeyGo]: https://github.com/lskzsy/HeyGo
 [license-image]: https://img.shields.io/badge/license-GPLv3-green 
 [license-url]: LICENSE
 [node-image]: https://img.shields.io/badge/node.js-%3E=_8.1-green
